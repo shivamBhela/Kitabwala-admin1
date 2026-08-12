@@ -1,0 +1,360 @@
+@import "tailwindcss";
+@import "../styles/theme.css";
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   GLOBAL DARK-MODE KILL SWITCH
+   The sections use Tailwind dark:bg-slate-* and dark:text-* classes throughout.
+   Rather than touching 20+ files, we override every dark-variant class here
+   to force the KitabWala yellow/white theme unconditionally.
+────────────────────────────────────────────────────────────────────────────── */
+
+/* Force all dark: background overrides to white / warm white */
+.dark\:bg-slate-950,
+.dark\:bg-slate-900,
+.dark\:bg-slate-800,
+.dark\:bg-slate-700,
+.dark\:bg-slate-800\/60,
+.dark\:bg-slate-900\/50,
+.dark\:bg-slate-950\/50,
+.dark\:bg-slate-800\/40,
+.dark\:bg-slate-700\/40,
+.dark\:bg-emerald-950\/60 {
+  background-color: #ffffff !important;
+}
+
+/* Force dark: text to dark readable colours */
+.dark\:text-slate-100,
+.dark\:text-slate-200,
+.dark\:text-slate-300 {
+  color: #111827 !important;
+}
+
+.dark\:text-slate-400,
+.dark\:text-slate-500 {
+  color: #555555 !important;
+}
+
+.dark\:text-amber-400 { color: #92660A !important; }
+.dark\:text-emerald-400 { color: #16a34a !important; }
+.dark\:text-rose-400 { color: #dc2626 !important; }
+.dark\:text-blue-400 { color: #2563eb !important; }
+.dark\:text-indigo-400 { color: #4f46e5 !important; }
+.dark\:text-purple-400 { color: #9333ea !important; }
+
+/* Force dark: border overrides to warm light border */
+.dark\:border-slate-800,
+.dark\:border-slate-700,
+.dark\:border-emerald-800 {
+  border-color: #FFC10730 !important;
+}
+
+/* Force any dark: ring overrides */
+.dark\:ring-slate-800,
+.dark\:ring-slate-700 {
+  --tw-ring-color: #FFC10730 !important;
+}
+
+/* Ensure the html root never gets dark class background */
+html.dark,
+html.dark body {
+  background: #ffffff !important;
+  color: #111827 !important;
+}
+
+/* Catch-all: override Tailwind v4's dark CSS variable injection */
+.dark {
+  /* Reset all CSS vars to light values so dark: classes resolve to white */
+  --color-slate-900: 255 255 255;
+  --color-slate-800: 248 248 248;
+  --color-slate-950: 255 255 255;
+  --tw-bg-opacity: 1;
+}
+
+/* Also override via @media to catch system-preference-based dark */
+@media (prefers-color-scheme: dark) {
+  html:not(.light) body {
+    background: #ffffff !important;
+    color: #111827 !important;
+  }
+}
+
+/* ─── Tailwind v4: override dark-variant Slate backgrounds ─────────────────── */
+/* These rules win because they appear later in the stylesheet than the         */
+/* generated Tailwind utilities, giving them higher cascade priority.           */
+
+/* All dark-mode slate/stone/zinc backgrounds → white */
+:where(html) .dark\:bg-slate-950 { background-color: #ffffff !important; }
+:where(html) .dark\:bg-slate-900 { background-color: #ffffff !important; }
+:where(html) .dark\:bg-slate-800 { background-color: #f9f9f9 !important; }
+:where(html) .dark\:bg-slate-700 { background-color: #f5f5f5 !important; }
+
+/* Opacity variants */
+:where(html) [class*="dark:bg-slate-"] { background-color: #ffffff !important; }
+:where(html) [class*="dark:bg-stone-"] { background-color: #ffffff !important; }
+:where(html) [class*="dark:bg-zinc-"]  { background-color: #ffffff !important; }
+:where(html) [class*="dark:bg-gray-"]  { background-color: #f8f8f8 !important; }
+:where(html) [class*="dark:bg-neutral-"] { background-color: #ffffff !important; }
+
+/* Dark text → dark on white */
+:where(html) [class*="dark:text-slate-1"] { color: #111827 !important; }
+:where(html) [class*="dark:text-slate-2"] { color: #222222 !important; }
+:where(html) [class*="dark:text-slate-3"] { color: #333333 !important; }
+:where(html) [class*="dark:text-slate-4"] { color: #555555 !important; }
+:where(html) [class*="dark:text-slate-5"] { color: #666666 !important; }
+
+/* Dark borders → warm light */
+:where(html) [class*="dark:border-slate-"] { border-color: #e8e0c8 !important; }
+
+/* ─── Tailwind v4 Theme Extension ──────────────────────────────────────────── */
+@theme inline {
+  /* Fonts */
+  --font-sans: "Inter", system-ui, -apple-system, sans-serif;
+  --font-mono: "JetBrains Mono", "Fira Code", monospace;
+
+  /* Brand */
+  --color-brand-primary: hsl(var(--brand-primary));
+  --color-brand-secondary: hsl(var(--brand-secondary));
+  --color-brand-accent: hsl(var(--brand-accent));
+
+  /* KitabWala Yellow */
+  --color-kw-yellow: #FFC107;
+  --color-kw-yellow-light: #FFD54F;
+  --color-kw-yellow-pale: #FFF8E1;
+
+  /* Background */
+  --color-background: hsl(var(--background));
+  --color-background-secondary: hsl(var(--background-secondary));
+  --color-background-tertiary: hsl(var(--background-tertiary));
+  --color-background-elevated: hsl(var(--background-elevated));
+
+  /* Foreground */
+  --color-foreground: hsl(var(--foreground));
+  --color-foreground-muted: hsl(var(--foreground-muted));
+  --color-foreground-subtle: hsl(var(--foreground-subtle));
+
+  /* Border */
+  --color-border: hsl(var(--border));
+  --color-border-strong: hsl(var(--border-strong));
+
+  /* Status */
+  --color-success: hsl(var(--success));
+  --color-success-bg: hsl(var(--success-bg));
+  --color-warning: hsl(var(--warning));
+  --color-warning-bg: hsl(var(--warning-bg));
+  --color-danger: hsl(var(--danger));
+  --color-danger-bg: hsl(var(--danger-bg));
+  --color-info: hsl(var(--info));
+  --color-info-bg: hsl(var(--info-bg));
+
+  /* Sidebar */
+  --color-sidebar-bg: hsl(var(--sidebar-bg));
+  --color-sidebar-border: hsl(var(--sidebar-border));
+  --color-sidebar-item-hover: hsl(var(--sidebar-item-hover));
+  --color-sidebar-item-active: hsl(var(--sidebar-item-active));
+  --color-sidebar-item-active-text: hsl(var(--sidebar-item-active-text));
+
+  /* Border Radius */
+  --radius-sm: var(--radius-sm);
+  --radius-md: var(--radius-md);
+  --radius-lg: var(--radius-lg);
+  --radius-xl: var(--radius-xl);
+
+  /* ─── Typography scale (enterprise dashboard hierarchy) ────────────────── */
+  --text-display: 2.25rem;    /* 36px — large KPI numbers (34-40px range) */
+  --text-h1: 2rem;            /* 32px — dashboard/page title */
+  --text-h2: 1.375rem;        /* 22px — section titles */
+  --text-card-title: 0.9375rem; /* 15px — card titles */
+  --text-table-header: 0.875rem; /* 14px — table headers */
+  --text-body: 0.875rem;      /* 14px — body text */
+  --text-small: 0.75rem;      /* 12px — small/meta text */
+}
+
+/* ─── Base Styles ───────────────────────────────────────────────────────────── */
+*, *::before, *::after {
+  border-color: hsl(var(--border));
+  box-sizing: border-box;
+}
+
+html {
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  scroll-behavior: smooth;
+}
+
+body {
+  background: #ffffff;
+  color: hsl(var(--foreground));
+  min-height: 100vh;
+  line-height: 1.6;
+}
+
+/* ─── KitabWala Yellow Header Band ─────────────────────────────────────────── */
+.kw-header {
+  background: var(--yellow);
+  position: relative;
+}
+
+/* Wavy SVG divider sitting at the bottom of the yellow header */
+.kw-wave-divider {
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 100%;
+  overflow: hidden;
+  line-height: 0;
+  pointer-events: none;
+}
+
+.kw-wave-divider svg {
+  display: block;
+  width: 100%;
+  height: 48px;
+}
+
+/* ─── Card Styles ───────────────────────────────────────────────────────────── */
+.kw-card {
+  background: #ffffff;
+  border-radius: 18px;
+  box-shadow: var(--card-shadow);
+  border: 1px solid hsl(var(--border));
+  transition: box-shadow var(--transition-base), transform var(--transition-base);
+}
+
+.kw-card:hover {
+  box-shadow: var(--card-shadow-hover);
+  transform: translateY(-2px);
+}
+
+/* ─── Button Styles ─────────────────────────────────────────────────────────── */
+.kw-btn-primary {
+  background: var(--yellow);
+  color: #111827;
+  font-weight: 600;
+  border-radius: var(--radius-md);
+  padding: 0.5rem 1.25rem;
+  border: 2px solid var(--yellow);
+  transition: background var(--transition-base), box-shadow var(--transition-base), transform var(--transition-fast);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.kw-btn-primary:hover {
+  background: #E6AC00;
+  border-color: #E6AC00;
+  box-shadow: 0 4px 16px rgb(255 193 7 / 0.35);
+  transform: translateY(-1px);
+}
+
+.kw-btn-primary:active {
+  transform: translateY(0) scale(0.98);
+}
+
+.kw-btn-secondary {
+  background: #ffffff;
+  color: #92660A;
+  font-weight: 600;
+  border-radius: var(--radius-md);
+  padding: 0.5rem 1.25rem;
+  border: 2px solid var(--yellow);
+  transition: background var(--transition-base), box-shadow var(--transition-base), transform var(--transition-fast);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.kw-btn-secondary:hover {
+  background: var(--yellow-pale);
+  box-shadow: 0 4px 12px rgb(255 193 7 / 0.20);
+  transform: translateY(-1px);
+}
+
+.kw-btn-secondary:active {
+  transform: translateY(0) scale(0.98);
+}
+
+/* ─── Scrollbar Styling ──────────────────────────────────────────────────────── */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: hsl(var(--border-strong));
+  border-radius: var(--radius-full);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--yellow);
+}
+
+/* ─── Selection ──────────────────────────────────────────────────────────────── */
+::selection {
+  background: #FFC10760;
+  color: #111827;
+}
+
+/* ─── Focus Ring ─────────────────────────────────────────────────────────────── */
+:focus-visible {
+  outline: 2px solid var(--yellow);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}
+
+/* ─── Gradient Utilities ────────────────────────────────────────────────────── */
+.gradient-brand {
+  background: linear-gradient(135deg, var(--yellow), var(--yellow-light));
+}
+
+.gradient-brand-text {
+  background: linear-gradient(135deg, #92660A, #D68C00);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.glass {
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid hsl(var(--border));
+}
+
+/* ─── Shimmer ────────────────────────────────────────────────────────────────── */
+.shimmer {
+  background: linear-gradient(
+    90deg,
+    #f9f9f9 25%,
+    #f0f0f0 50%,
+    #f9f9f9 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite linear;
+}
+
+@keyframes shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* ─── Animations ─────────────────────────────────────────────────────────────── */
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fadeInUp {
+  animation: fadeInUp 0.35s ease both;
+}
+
+/* ─── Typography Utilities ──────────────────────────────────────────────────── */
+.text-balance {
+  text-wrap: balance;
+}

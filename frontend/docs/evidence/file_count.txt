@@ -1,0 +1,4 @@
+﻿Total source files (excluding node_modules/.next): 79
+TypeScript (.ts) files: 22
+TypeScript React (.tsx) files: 34
+Exported React components (approx): 68

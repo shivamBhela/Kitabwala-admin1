@@ -1,0 +1,6457 @@
+﻿
+
+========== FILE: c:\Work material\Kitabwalah Admin Portal\kitabwalah_admin_portal.pdf ==========
+
+--- PAGE 1 ---
+KITABWALAH
+Admin Portal ΓÇö Complete Feature Specification
+All 22 Sections + Database Tables + Fields Used
+admin.kitabwalah.com | Single Admin Level | Full Access
+Modelled as near-identical copy of WooCommerce + WCFM WordPress admin
+Generated: 18 July 2026
+Admin Portal Overview ΓÇö 22 Sections
+Section
+What Admin Can Do
+Priority
+1. Dashboard
+Real-time stats, revenue graph, recent orders, top products
+High
+2. Orders
+View all orders, update status, process refunds, download invoices
+High
+3. Products
+Approve/reject vendor listings, edit products, manage featured
+High
+4. Vendors
+Verify KYC, set commission, suspend/activate, view earnings
+High
+5. Users
+View all users, ban/unban, manage wallet, order history
+High
+6. Delivery
+Manage delivery persons, assign same-day orders, track shipments
+High
+7. Pincodes & Cities
+Set delivery zones, COD rules per pincode, same-day eligibility
+High
+8. Returns
+Review return requests, approve/reject, initiate refunds
+High
+9. Withdrawals
+Approve vendor withdrawal requests, mark as paid, add UTR number
+High
+10. Coupons
+Create/edit/deactivate coupons, assign to specific users
+Medium
+11. Banners
+Add/edit/remove homepage banners, set validity dates
+Medium
+12. Homepage Pins
+Pin specific products/categories/banners to display slots
+Medium
+13. Reviews
+Approve/reject product reviews, manage ratings
+Medium
+14. Support Tickets
+View and resolve customer + vendor support tickets
+Medium
+15. Issue Reports
+View and resolve user-reported platform issues
+Medium
+16. Competitive
+Exams
+Create exam sections (UPSC/SSC/NEET), link products/categories
+Medium
+17. App Settings
+Platform config: delivery charges, commission, GST, coupon rules
+High
+18. Static Pages
+Edit About Us, Terms, Privacy Policy, Refund Policy
+Low
+19. Notifications
+Send push notifications to all users or specific segments
+Medium
+20. Audit Logs
+Full history of all admin actions with before/after data
+Low
+21. Email Logs
+View all outgoing emails sent by the platform
+Low
+22. Migration Logs
+View data migration run history and row counts per table
+Low
+
+--- PAGE 2 ---
+1. Dashboard
+Real-time platform overview ΓÇö first screen after login
+Widgets on the dashboard:
+Widget
+Data Shown
+Source
+Total Revenue
+Sum of all delivered order totals (today / week / month)
+orders.total WHERE status=delivered
+Total Orders
+Count by status: pending / processing / delivered / cancelled
+orders GROUP BY status
+Total Users
+All registered users + new registrations today
+users COUNT + DATE filter
+Total Vendors
+Active vendors + pending KYC verification count
+vendor_profiles WHERE is_active
+Revenue Graph (30d)
+Daily revenue bar chart for last 30 days
+orders GROUP BY DATE(created_at)
+Recent Orders (10)
+Order number, customer, amount, status
+orders ORDER BY created_at DESC LIMIT 10
+Pending Actions
+Products pending review, KYC pending, withdrawals pending
+Multiple tables WHERE status=pending
+Top 5 Products
+Best selling by sold_count
+products ORDER BY sold_count DESC LIMIT 5
+Low Stock Alert
+Products with stock_quantity below 5
+products WHERE stock_quantity < 5
+2. Order Management
+Full order lifecycle ΓÇö view, update, refund, invoice download
+ΓÇó View all orders with filters: status, date range, payment method, delivery type, vendor, city
+ΓÇó Search by order number, customer name, phone, email
+ΓÇó View full order detail: items, addresses, payment breakdown, GST breakdown, timeline
+ΓÇó Update order status manually (pending ΓåÆ confirmed ΓåÆ processing ΓåÆ shipped ΓåÆ delivered)
+ΓÇó Process full or partial refund ΓÇö choose original payment method or wallet credit
+ΓÇó Download GST invoice PDF per order (auto-generated), separate per vendor
+ΓÇó View Razorpay/Cashfree transaction IDs and payment gateway details
+ΓÇó Cancel order with reason ΓÇö triggers automatic refund flow
+ΓÇó View COD orders separately ΓÇö mark collected amount
+ΓÇó Export orders to CSV with date range filter
+Tables Used:
+Table
+Key Fields
+Purpose
+orders
+id, order_number, user_id, status, payment_status, payment_method, subtotal, shipping_amount,
+cod_charge, discount_amount, gst_amount, total, is_cod, delivery_type, pincode, invoice_number,
+razorpay_payment_id, delivered_at, refund_amount, created_at
+Main order
+order_items
+id, order_id, product_id, vendor_id, product_name, unit_price, quantity, total_price, gst_rate,
+gst_amount, status
+Line items
+order_addresses
+order_id, address_type, first_name, last_name, address_1, city, state, pincode, phone
+Addresses
+vendor_order_items
+order_id, vendor_id, commission_rate, commission_amount, vendor_earning, invoice_number, status,
+settlement_status
+Per-vendor
+shipments
+order_id, delivery_person_id, delivery_type, status, tracking_id, delivery_attempts, actual_delivered_at
+Delivery
+wallet_transactions
+user_id, type, source, amount, balance_after, order_id
+Wallet refunds
+payment_webhooks
+gateway, event, payload, processed, order_id
+Payment logs
+3. Product Management
+Approve/reject listings, edit products, manage catalogue
+ΓÇó View all products with filters: status (pending/active/rejected), vendor, category, price range
+ΓÇó Approve pending product listing ΓÇö sets status=active, records approved_by_id + approved_at
+ΓÇó Reject listing with reason ΓÇö rejection_reason stored, vendor notified
+ΓÇó Edit any product: title, description, price, GST rate, HSN code, stock, images
+ΓÇó Set/remove featured status with expiry date (featured_until)
+ΓÇó View and edit city-wise prices: Muzaffarpur / Patna / Boring Road / Others
+ΓÇó Manage categories ΓÇö create, edit, nest into subcategories (unlimited depth)
+ΓÇó Bulk actions: approve multiple, deactivate multiple
+ΓÇó Export product catalogue to CSV
+
+--- PAGE 3 ---
+Tables Used:
+Table
+Key Fields
+Purpose
+products
+id, wp_id, vendor_id, title, slug, regular_price, sale_price, gst_rate, hsn_code, sku, isbn, author,
+book_format, condition, stock_quantity, status, approved_by_id, approved_at, rejection_reason,
+featured_until
+Core product
+product_images
+product_id, image_versions (JSON: thumbnail/medium/large/original), is_primary, display_order
+Photos
+categories
+id, name, slug, parent_id, image_url, display_order, is_active
+Category tree
+product_attributes
+product_id, attribute_name, attribute_value
+book-author, format
+product_city_prices
+product_id, city_id, price
+City-wise pricing
+product_reviews
+product_id, user_id, rating, title, content, status, is_verified_purchase
+Reviews
+4. Vendor Management
+KYC verification, commission control, earnings, suspension
+ΓÇó View all vendors: store name, total products, orders, pending balance, verification status
+ΓÇó Verify vendor KYC ΓÇö fill simple admin form, set is_verified=true (all data in kyc_form_data JSON)
+ΓÇó Set per-vendor commission rate (override the platform default of 10%)
+ΓÇó View earnings breakdown: total_earnings, total_withdrawn, pending_balance
+ΓÇó View 30-day revenue graph + top 5 products per vendor
+ΓÇó Suspend vendor (is_active=false) ΓÇö all their products go inactive automatically
+ΓÇó Reactivate suspended vendor
+ΓÇó View vendor's full order and withdrawal history
+ΓÇó Edit bank details for settlement corrections
+ΓÇó Enable/disable vacation mode for vendor
+Tables Used:
+Table
+Key Fields
+Purpose
+vendor_profiles
+id, user_id, store_name, store_slug, gstin, commission_rate, total_earnings, total_withdrawn,
+pending_balance, average_rating, total_reviews, is_verified, kyc_form_data, vacation_mode, is_active
+Vendor data
+users
+id, display_name, phone, email, role, is_active, is_banned
+Vendor account
+vendor_order_items
+vendor_id, commission_rate, commission_amount, vendor_earning, settlement_status
+Earnings
+withdrawal_request
+s
+vendor_id, amount, status, requested_at, processed_at, admin_note, payment_reference
+Withdrawals
+store_followers
+vendor_id, user_id, created_at
+Follower count
+5. User Management
+View, ban/unban, wallet management, order history
+ΓÇó View all users with filters: role, registration date, city, is_banned, is_migrated
+ΓÇó Search by name, phone, email
+ΓÇó View user profile: orders, wallet balance, referrals, saved addresses
+ΓÇó Ban user with reason (is_banned=true, ban_reason stored)
+ΓÇó Unban user
+ΓÇó Add wallet credit or debit to any user (admin_credit / admin_debit transaction type)
+ΓÇó View full wallet transaction history per user
+ΓÇó View user's complete order history
+ΓÇó View migrated users (is_migrated=true) ΓÇö check if they completed first login
+ΓÇó Manage reseller program: assign reseller role, view referrals and commissions
+Tables Used:
+Table
+Key Fields
+Purpose
+users
+id, wp_id, phone, email, display_name, role, wallet_balance, is_active, is_banned, ban_reason,
+is_migrated, migration_login_done, last_login_at, created_at
+User accounts
+wallet_transactions
+user_id, type, source, amount, balance_after, order_id, description, created_at
+Wallet history
+resellers
+user_id, referral_code, total_referrals, total_earnings, is_active
+Reseller data
+
+--- PAGE 4 ---
+Table
+Key Fields
+Purpose
+reseller_referrals
+reseller_id, referred_user_id, first_order_id, commission_amount, credited_at
+Referrals
+user_saved_addres
+ses
+user_id, label, address_1, city, state, pincode, is_default
+Addresses
+device_tokens
+user_id, token, platform, is_active
+Push tokens
+6. Delivery Management
+Same-day team, Shadowfax orders, live tracking, assignments
+ΓÇó Add/edit/remove delivery persons (same-day delivery team only)
+ΓÇó View availability status + current GPS location of all delivery persons
+ΓÇó Assign pending same-day orders to available delivery persons
+ΓÇó View all active shipments: same-day (GPS map) and normal (Shadowfax milestones)
+ΓÇó Force-update shipment status for edge cases
+ΓÇó View delivery attempt history per shipment (max 3 normal, max 1 same-day)
+ΓÇó View failed deliveries with reason ΓÇö reassign or cancel
+ΓÇó Manage delivery person salary (salary_per_month field)
+Tables Used:
+Table
+Key Fields
+Purpose
+delivery_persons
+id, user_id, name, phone, vehicle_type, vehicle_number, last_location_lat, last_location_lng,
+is_available, is_active, salary_per_month
+Delivery team
+shipments
+order_id, delivery_person_id, delivery_type, status, tracking_id, shadowfax_order_id, delivery_otp,
+estimated_delivery_date, actual_delivered_at, delivery_photo_url, delivery_attempts, failed_reason
+All shipments
+pincodes
+pincode, city_id, delivery_zone, is_same_day_eligible, is_delivery_available
+Zone check
+7. Pincodes & Cities
+COD rules per pincode, delivery zones, same-day eligibility
+ΓÇó Add new city (name + slug)
+ΓÇó Add/edit pincodes ΓÇö map each to a city + delivery zone (Local/Bihar/South/Rest India)
+ΓÇó Set COD type per pincode: full_cod | partial_cod (+ partial amount) | prepaid_only
+ΓÇó Enable/disable same-day delivery eligibility per pincode (17 local Muzaffarpur pincodes)
+ΓÇó Enable/disable delivery availability for pincode (remote/unserviceable areas)
+ΓÇó Bulk import pincodes from CSV
+Tables Used:
+Table
+Key Fields
+Purpose
+cities
+id, name, slug, is_active
+City master
+pincodes
+id, pincode, city_id, delivery_zone, cod_type, partial_cod_amount, is_same_day_eligible,
+is_delivery_available
+Pincode config
+8. Return Requests
+Review, approve/reject, refunds, Shadowfax reverse pickup
+ΓÇó View all return requests with filters: status, date, vendor, reason
+ΓÇó View request detail: order, item, reason, proof photos uploaded by customer
+ΓÇó Approve return ΓÇö triggers Shadowfax reverse pickup (normal) or own team (same-day)
+ΓÇó Reject return request with admin note (sent to customer)
+ΓÇó Set refund amount (full or partial)
+ΓÇó Choose refund method: original payment method or wallet credit
+ΓÇó Track return pickup and delivery status
+ΓÇó Mark return completed after item received by vendor
+ΓÇó Return policy: 7 days from delivery, wrong product only, partial returns per item allowed
+Tables Used:
+
+--- PAGE 5 ---
+Table
+Key Fields
+Purpose
+return_requests
+id, order_id, order_item_id, user_id, reason, reason_description, proof_images, status, refund_amount,
+refund_method, admin_note, reviewed_by_id, reviewed_at
+Return data
+order_items
+id, product_name, unit_price, quantity, status
+Item returned
+wallet_transactions
+user_id, type=credit, source=order_refund, amount
+Wallet refund
+9. Withdrawal Requests
+Manual vendor payout approval ΓÇö NOT automated
+ΓÇó View all pending withdrawal requests from vendors
+ΓÇó Check vendor's current pending_balance before approving
+ΓÇó Approve request ΓÇö status becomes processing
+ΓÇó Mark as completed ΓÇö enter UTR number or payment reference
+ΓÇó Reject with admin note
+ΓÇó On completion: updates vendor_profiles.total_withdrawn + pending_balance automatically
+ΓÇó View withdrawal history per vendor
+ΓÇó Filter by status: pending / approved / processing / completed / rejected
+Tables Used:
+Table
+Key Fields
+Purpose
+withdrawal_request
+s
+id, wp_id, vendor_id, amount, status, requested_at, processed_at, admin_note, payment_reference
+Request data
+vendor_profiles
+pending_balance, total_withdrawn, bank_account_number, bank_ifsc, upi_id
+Balance + bank
+10. Coupon Management
+Create/edit coupons, assign to users, track usage
+ΓÇó View all coupons: code, type, value, used_count, validity period
+ΓÇó Create new coupon: percentage or fixed_amount type
+ΓÇó Set min_order_amount (null = no minimum) and max_discount_amount cap
+ΓÇó Set birthday coupon flag ΓÇö auto-applies in user's birthday month
+ΓÇó Set first-order-only flag (for WELCOME30 style coupons)
+ΓÇó Set usage_limit (null = unlimited)
+ΓÇó Assign coupon to a specific user via user_coupons table
+ΓÇó Deactivate/activate coupon
+ΓÇó View usage history: user, order, discount applied
+ΓÇó Active at launch: KITABWALAH (10%), NEW10 (10% min Rs.199), BIRTHDAY10 (10% max Rs.50), WELCOME30 (Rs.30 first order)
+Tables Used:
+Table
+Key Fields
+Purpose
+coupons
+id, wp_id, code, type, value, min_order_amount, max_discount_amount, is_birthday_coupon,
+is_first_order_only, usage_limit, used_count, valid_from, valid_until, is_active
+Coupon config
+coupon_usages
+coupon_id, user_id, order_id, discount_applied, used_at
+Usage tracking
+user_coupons
+user_id, coupon_id, assigned_at, expires_at
+User-specific
+11. Banner Management
+Homepage banners ΓÇö add, schedule, link to products/categories
+ΓÇó Add new banner: upload image (to S3), set title and subtitle
+ΓÇó Set tap action: open product | open category | open URL | no action
+ΓÇó Set display_order (drag to reorder on app)
+ΓÇó Set validity dates (valid_from, valid_until) ΓÇö auto shows/hides by date
+ΓÇó Activate or deactivate any banner
+Tables Used:
+Table
+Key Fields
+Purpose
+banners
+id, title, subtitle, image_url, action_type, action_value, display_order, valid_from, valid_until, is_active
+Banner config
+12. Homepage Pin Management
+
+--- PAGE 6 ---
+Override auto-computed homepage ΓÇö pin items to specific slots
+Homepage uses Option C: auto-computed ranking + admin pin override. Admin can force specific products, categories, or banners into any
+display slot. Pinned items override the algorithm for that slot only. Unpinned slots remain auto-computed.
+Tables Used:
+Table
+Key Fields
+Purpose
+homepage_pins
+id, type (product/category/banner), reference_id, position, is_active, updated_at
+Pin overrides
+13. Review Management
+Approve/reject product reviews, vendor notified on new review
+ΓÇó View all reviews pending approval (default status = pending)
+ΓÇó Approve review ΓÇö status=approved, vendor average_rating recalculated
+ΓÇó Reject review with reason
+ΓÇó Filter reviews by product, vendor, rating, status
+ΓÇó View verified purchase badge (is_verified_purchase = true for order-linked reviews)
+Tables Used:
+Table
+Key Fields
+Purpose
+product_reviews
+id, wp_id, product_id, user_id, vendor_id, order_id, rating, title, content, images, is_verified_purchase,
+status
+Review data
+vendor_profiles
+average_rating, total_reviews
+Updated on approve
+14. Support Tickets & Issue Reports
+Customer and vendor support ΓÇö view, respond, resolve
+ΓÇó View all open support tickets (from customers and vendors)
+ΓÇó Filter by status: open / in_progress / resolved / closed
+ΓÇó View ticket detail: user, vendor (if vendor-related), order (if applicable), message
+ΓÇó Update status and add resolution note
+ΓÇó View user-reported platform issue reports separately (issue_reports table)
+ΓÇó Filter issues by category: delivery / payment / product / account / other
+Tables Used:
+Table
+Key Fields
+Purpose
+support_tickets
+id, wp_id, user_id, vendor_id, order_id, subject, message, status, resolution_note, created_at
+Support tickets
+issue_reports
+id, user_id, order_id, category, description, status, resolution_note
+Issue reports
+16. Competitive Exams
+UPSC, SSC, NEET, JEE, BPSC sections ΓÇö link books to exams
+ΓÇó Create new exam section: UPSC, SSC CGL, NEET, JEE, BPSC, Bihar SI, RRB, etc.
+ΓÇó Add individual products or entire categories to an exam section
+ΓÇó Set display_order within each exam section
+ΓÇó Upload exam banner image (goes to S3)
+ΓÇó Enable/disable any exam section from showing on app
+Tables Used:
+Table
+Key Fields
+Purpose
+competitive_exams
+id, name, slug, description, image_url, display_order, is_active
+Exam sections
+exam_collections
+exam_id, product_id, category_id, display_order, added_at
+Books per exam
+17. App Settings
+Platform-wide configuration ΓÇö delivery, GST, commission, limits
+All settings stored as key-value pairs in app_settings table. Admin can update without code deploy.
+Setting Key
+Description
+Default
+delivery_charge_local
+Delivery charge for Local zone (17 Muzaffarpur pincodes)
+Rs.39
+delivery_charge_bihar
+Delivery charge for Rest Bihar zone
+Rs.49
+delivery_charge_south
+Delivery charge for South India zone
+Rs.59
+
+--- PAGE 7 ---
+Setting Key
+Description
+Default
+delivery_charge_rest
+Delivery charge for Rest India zone
+Rs.59
+free_delivery_local
+Order amount above which local delivery is free
+Rs.500
+free_delivery_bihar
+Order amount above which Bihar delivery is free
+Rs.599
+cod_charge
+Flat COD charge per order (regardless of order value)
+Rs.7
+default_commission_rate
+Platform commission % applied to new vendors by default
+10%
+gst_stationery
+GST rate applied to stationery/pen products
+18%
+gst_shipping
+GST rate applied to shipping charges
+18%
+reseller_commission
+Wallet credit to referrer on referee's first order after delivery
+Rs.25
+return_window_days
+Number of days customer has to raise a return request
+7
+store_city
+Platform HQ city (used on GST invoices)
+Muzaffarpur
+store_gstin
+Platform GSTIN number (on invoices)
+...
+razorpay_key_id
+Razorpay live API key (payment gateway)
+rzp_live_...
+Table Used: app_settings (id, key UNIQUE, value, description, created_at, updated_at)
+18. Static Pages
+About Us, Terms & Conditions, Privacy Policy, Refund Policy
+Admin edits page content directly without any code deployment needed. Rich text editor. Pages: about-us | terms | privacy | refund-policy
+Table Used: static_pages (id, title, slug UNIQUE, content, meta_title, meta_description, is_active, updated_at)
+19. Push Notifications
+Send push notifications to users via Firebase FCM
+ΓÇó Send broadcast notification to all users
+ΓÇó Send to all vendors only
+ΓÇó Send to users in a specific city
+ΓÇó Send to a specific user by phone/email
+ΓÇó View notification delivery log per user
+ΓÇó View unread notification count per user
+Tables Used: notifications (user_id, type, title, body, data JSON, is_read, created_at), device_tokens (user_id, token, platform, is_active)
+20. Audit, Email & Migration Logs
+Full platform activity history ΓÇö read-only for admin
+Admin Action Logs ΓÇö Every action admin takes is automatically logged with before/after data. Cannot be deleted. Actions logged:
+action_type
+When It Fires
+user_ban / user_unban
+Admin bans or unbans a user account
+product_approve / product_reject
+Admin approves or rejects a vendor product listing
+vendor_verify / vendor_suspend
+Admin completes KYC or suspends a vendor store
+order_refund
+Admin processes a refund on an order
+withdrawal_approve / reject
+Admin approves or rejects a vendor withdrawal request
+coupon_create / deactivate
+Admin creates or deactivates a coupon code
+banner_update
+Admin adds or modifies a homepage banner
+pincode_update
+Admin changes COD or delivery settings for a pincode
+settings_update
+Admin changes any platform-wide app setting
+Table: admin_action_logs (admin_id, action_type, target_table, target_id, description, old_data JSON, new_data JSON, created_at)
+Email Logs ΓÇö All outgoing platform emails (97 rows migrated from WordPress wp_wpml_mails). Admin views sent emails, recipient, subject,
+status.
+Table: email_logs (to_email, subject, message, status, sent_at, created_at)
+Migration Logs ΓÇö Data migration script run history. How many records migrated/failed/skipped per table. Used to verify data integrity after
+any migration run.
+
+--- PAGE 8 ---
+Table: migration_run_logs (source_db, source_table, destination_table, records_migrated, records_failed, records_skipped, status, error_log,
+started_at, completed_at)
+Kitabwalah Admin Portal ΓÇö Feature Specification | 22 Sections | Generated: 18 July 2026 11:49 | All features based on locked decisions from project
+conversations.
+
+
+
+========== FILE: c:\Work material\Kitabwalah Admin Portal\kitabwalah_schema.pdf ==========
+
+--- PAGE 1 ---
+DATABASE 1
+KITABWALAH
+Complete Production Schema ΓÇö Final
+46 Models | 30 Enums
+NestJS + PostgreSQL (AWS RDS) + Prisma ORM
+Source: u101172427_newdev (WordPress + WooCommerce + WCFM)
+Migration tracking: wp_id on every migrated table
+Separate database ΓÇö no cross-DB joins with the other platform
+Platform Decisions Built Into Schema
+Decision
+Value / Implementation
+Source DB
+u101172427_newdev ΓÇö WordPress + WooCommerce + WCFM (Dokan unused)
+Platform
+Multi-vendor new books, stationery, school/college books, NCERT, competitive exam materials
+Commission
+10% platform fee. Vendor keeps 90%. Confirmed from live wp_wcfm_marketplace_orders data.
+Delivery Zones
+Local Rs.39 (free>Rs.500) | Bihar Rs.49 (free>Rs.599) | South Rs.59 (free>Rs.699) | Rest Rs.59 (free>Rs.799)
+COD
+Rs.7 flat per order. Admin sets per-pincode: full_cod / partial_cod / prepaid_only.
+GST
+Books 0%, Stationery 18%, Shipping 18%. Products carry base_price + gst_rate + hsn_code. Auto-invoice PDF per vendor.
+Auth
+Passwordless only. Phone OTP (Truecaller->WhatsApp->SMS fallback), Google OAuth, Email OTP. Legacy users keep
+password_hash (not exposed in UI).
+Payment
+Razorpay (only active gateway confirmed). Cashfree also supported. Wallet top-up via both. No split payment.
+Delivery
+Same-day: own team, real-time GPS + OTP + photo proof. Normal: Shadowfax API auto-called.
+Attempts
+Normal max = 3. Same-day max = 1. On cancel: shipping deducted, rest refunded.
+Returns
+7 days from delivery. Wrong product only. Partial returns per item. Customer chooses original payment or wallet.
+Coupons
+KITABWALAH (10% no min), NEW10 (10% Rs.199 min), BIRTHDAY10 (10% birthday month max Rs.50), WELCOME30
+(Rs.30 first order Rs.299 min). One coupon per checkout.
+Cart
+Persists in PostgreSQL. Same vendor+product = increment qty. Different vendors = separate rows.
+Wallet
+Real money. Razorpay/Cashfree top-up. Insufficient balance prompts top-up ΓÇö no split payment.
+Reseller
+Rs.25 wallet credit to referrer. First order of referred user only. Credited after delivery.
+Homepage
+Option C: auto-computed + admin pin override via homepage_pins table.
+Search History
+Last 5 searches per user stored in search_history table.
+Source Tracking
+wp_id on every migrated table. 19 tables have wp_id.
+Guest Orders
+680 historical guest orders NOT migrated. Guest checkout disabled on new platform.
+Vendor KYC
+Admin manually verifies. Simple form. kyc_form_data JSON for scalability.
+
+--- PAGE 2 ---
+Enums (30 Total)
+UserRole
+customer
+vendor
+admin
+delivery_person
+reseller
+AuthProvider
+phone
+google
+email
+OtpPurpose
+phone_login
+email_verify
+phone_verify
+ProductStatus
+draft
+pending_review
+active
+inactive
+rejected
+BookCondition
+new_condition
+like_new
+good
+acceptable
+poor
+BookFormat
+physical
+audio
+ebook
+OrderStatus
+pending
+confirmed
+processing
+shipped
+out_for_delivery
+delivered
+cancelled
+return_requested
+returned
+OrderItemStatus
+active
+return_requested
+returned
+cancelled
+PaymentStatus
+pending
+paid
+failed
+refunded
+partially_refunded
+DeliveryType
+same_day
+normal
+PaymentMethod
+razorpay
+cashfree
+cod
+wallet
+ShipmentStatus
+pending
+assigned
+picked_up
+in_transit
+out_for_delivery
+delivered
+delivery_failed
+returned_to_seller
+WithdrawalStatus
+pending
+approved
+processing
+completed
+rejected
+CouponType
+percentage
+fixed_amount
+NotificationType
+order_placed
+order_confirmed
+order_shipped
+order_delivered
+order_cancelled
+payment_received
+review_posted
+promotional
+system
+
+--- PAGE 3 ---
+ReturnReason
+wrong_item
+damaged_in_transit
+not_as_described
+missing_pages
+other
+ReturnRequestStatus
+pending
+approved
+rejected
+pickup_scheduled
+picked_up
+refund_initiated
+completed
+RefundMethod
+original_payment
+wallet
+DeliveryZone
+local
+rest_bihar
+south_india
+rest_india
+CodType
+full_cod
+partial_cod
+prepaid_only
+WalletTransactionType
+credit
+debit
+WalletTransactionSource
+order_payment
+order_refund
+referral_reward
+reseller_commission
+top_up
+withdrawal_reversal
+admin_credit
+admin_debit
+VendorSettlementStatus
+pending
+processing
+completed
+failed
+SupportTicketStatus
+open
+in_progress
+resolved
+closed
+IssueCategory
+delivery
+payment
+product
+account
+other
+MigrationStatus
+running
+completed
+failed
+DevicePlatform
+android
+ios
+web
+HomepinType
+product
+category
+banner
+BannerActionType
+product
+category
+url
+none
+AdminActionType
+user_ban
+user_unban
+product_approve
+product_reject
+vendor_verify
+vendor_suspend
+order_refund
+withdrawal_approve
+withdrawal_reject
+coupon_create
+coupon_deactivate
+banner_update
+pincode_update
+settings_update
+
+--- PAGE 4 ---
+Tables (46 Total)
+#
+Table
+Field
+s
+Source
+Key Info
+1
+User
+49
+wp_users +
+wp_usermeta
+938 rows. wp_id tracking.
+2
+VendorProfile
+44
+wp_wcfm_marketpla
+ce_vendor_data
+Commission 10%. Manual withdrawal.
+3
+Category
+14
+wp_terms +
+wp_term_taxonomy
+product_cat taxonomy.
+4
+City
+10
+NEW
+Muzaffarpur, Patna, Boring Road, Others.
+5
+Pincode
+11
+NEW
+Admin-configurable COD + delivery zone per pincode.
+6
+Product
+31
+wp_posts +
+wp_postmeta
+4,986 products. 3,240 have city-wise prices.
+7
+ProductCategory
+4
+wp_term_relationshi
+ps
+Many-to-many join.
+8
+ProductImage
+5
+wp_postmeta
+image_versions JSON ΓÇö 4 sizes via Lambda+Sharp.
+9
+ProductAttribute
+6
+wp_postmeta
+book-author, select-format, color, brand, size.
+1
+0
+ProductCityPrice
+8
+wp_postmeta
+(wcca_city_prices)
+3,240 products with city prices.
+1
+1
+Order
+47
+wp_wc_orders
+HPOS
+1,001 orders. 680 guest orders excluded.
+1
+2
+OrderItem
+21
+wp_woocommerce_
+order_items
+Product snapshot preserved.
+1
+3
+OrderAddress
+17
+wp_wc_order_addre
+sses
+1,976 rows.
+1
+4
+VendorOrderItem
+17
+wp_wcfm_marketpla
+ce_orders
+1,066 rows. 10% commission confirmed.
+1
+5
+UserSavedAddress
+18
+wp_usermeta
+billing/shipping address fields.
+1
+6
+DeliveryPerson
+20
+NEW
+Own same-day delivery team.
+1
+7
+Shipment
+21
+NEW
+Same-day GPS+OTP+photo. Normal Shadowfax.
+1
+8
+Coupon
+21
+wp_posts
+(shop_coupon)
+KITABWALAH, NEW10, BIRTHDAY10, WELCOME30.
+1
+9
+CouponUsage
+9
+NEW
+Per user per order tracking.
+2
+0
+UserCoupon
+7
+NEW
+Admin assigns coupons to users.
+2
+1
+ProductReview
+17
+wp_comments
+Vendor notified on new review.
+2
+2
+DeviceToken
+8
+NEW
+FCM push notifications (Firebase).
+2
+3
+Notification
+7
+NEW
+In-app + push log.
+2
+4
+Banner
+12
+NEW
+Homepage banners.
+2
+5
+AppSetting
+6
+wp_options (key
+rows)
+Seeded from WP options.
+2
+6
+Reseller
+10
+NEW
+Reseller affiliate program.
+
+--- PAGE 5 ---
+#
+Table
+Field
+s
+Source
+Key Info
+2
+7
+ResellerReferral
+9
+NEW
+Rs.25 on first order, after delivery.
+2
+8
+BookSwipe
+7
+NEW
+Fiction swipe game.
+2
+9
+Wishlist
+6
+NEW
+Replaces wp_wcfm_wishlist.
+3
+0
+CompetitiveExam
+10
+NEW
+UPSC, SSC, NEET, JEE, BPSC.
+3
+1
+ExamCollection
+9
+NEW
+Products/categories linked to exams.
+3
+2
+EmailLog
+8
+wp_wpml_mails
+97 rows migrated.
+3
+3
+StaticPage
+9
+NEW
+About, T&C;, Privacy ΓÇö admin-editable.
+3
+4
+HomepagePin
+7
+NEW
+Option C ΓÇö auto-computed + pin override.
+3
+5
+SearchHistory
+5
+NEW
+Last 5 searches per user.
+3
+6
+CartItem
+12
+NEW
+Persistent cross-device cart.
+3
+7
+ReturnRequest
+18
+NEW
+7-day, wrong item, partial returns allowed.
+3
+8
+WalletTransaction
+12
+NEW
+Real money wallet. Razorpay/Cashfree top-up.
+3
+9
+WithdrawalRequest
+12
+wp_wcfm_marketpla
+ce_withdrawal
+Manual settlement.
+4
+0
+StoreFollower
+7
+wp_wcfm_marketpla
+ce_followers
+Users following vendor stores.
+4
+1
+SupportTicket
+13
+wp_wcfm_enquiry +
+tickets + CF7
+CF7: 5 active rows.
+4
+2
+IssueReport
+10
+NEW
+User-reported issues.
+4
+3
+PaymentWebhook
+8
+WP Razorpay log
+Migrated + new webhooks.
+4
+4
+AdminActionLog
+10
+NEW
+Full admin audit trail.
+4
+5
+Certificate
+8
+WooCommerce LMS
+70 rows ΓÇö kept for verification only.
+4
+6
+MigrationRunLog
+12
+NEW
+Migration script tracking.
+
+--- PAGE 6 ---
+Detailed Field Reference
+
+--- PAGE 7 ---
+01. User
+Source: wp_users + wp_usermeta
+938 rows. wp_id tracking.
+Field
+Type
+Req
+Notes
+id
+Int
+YES
+wp_id
+Int?
+NO
+WordPress user ID (newdev migration ref)
+phone
+String?
+NO
+phone_verified
+Boolean
+YES
+email
+String?
+NO
+email_verified
+Boolean
+YES
+password_hash
+String?
+NO
+legacy migrated users only, not exposed in UI
+auth_provider
+AuthProvider
+YES
+google_id
+String?
+NO
+display_name
+String
+YES
+first_name
+String?
+NO
+last_name
+String?
+NO
+profile_picture
+String?
+NO
+role
+UserRole
+YES
+referral_code
+String?
+NO
+referred_by_id
+Int?
+NO
+detected_city_id
+Int?
+NO
+detected_pincode
+String?
+NO
+wallet_balance
+Decimal
+YES
+is_active
+Boolean
+YES
+is_banned
+Boolean
+YES
+ban_reason
+String?
+NO
+is_migrated
+Boolean
+YES
+came from WordPress newdev migration
+migration_login_do
+ne
+Boolean
+YES
+completed first login on new platform
+last_login_at
+DateTime?
+NO
+created_at
+DateTime
+YES
+updated_at
+DateTime
+YES
+referred_by
+User?
+NO
+detected_city
+City?
+NO
+vendor_profile
+VendorProfil
+e?
+NO
+delivery_person
+DeliveryPers
+on?
+NO
+reseller
+Reseller?
+NO
+saved_addresses
+UserSavedAdd
+ress[]
+YES
+device_tokens
+DeviceToken[
+]
+YES
+notifications
+Notification
+[]
+YES
+orders
+Order[]
+YES
+product_reviews
+ProductRevie
+w[]
+YES
+cart_items
+CartItem[]
+YES
+
+--- PAGE 8 ---
+Field
+Type
+Req
+Notes
+wishlists
+Wishlist[]
+YES
+book_swipes
+BookSwipe[]
+YES
+search_history
+SearchHistor
+y[]
+YES
+wallet_transactions
+WalletTransa
+ction[]
+YES
+return_requests
+ReturnReques
+t[]
+YES
+issue_reports
+IssueReport[
+]
+YES
+support_tickets
+SupportTicke
+t[]
+YES
+coupon_usages
+CouponUsage[
+]
+YES
+user_coupons
+UserCoupon[]
+YES
+admin_action_logs
+AdminActionL
+og[]
+YES
+store_followers
+StoreFollowe
+r[]
+YES
+
+--- PAGE 9 ---
+02. VendorProfile
+Source: wp_wcfm_marketplace_vendor_data
+Commission 10%. Manual withdrawal.
+Field
+Type
+Req
+Notes
+id
+Int
+YES
+wp_id
+Int?
+NO
+user_id
+Int
+YES
+user
+User
+YES
+store_name
+String
+YES
+store_slug
+String
+YES
+store_description
+String?
+NO
+store_logo
+String?
+NO
+store_banner
+String?
+NO
+phone
+String?
+NO
+address
+String?
+NO
+city
+String?
+NO
+state
+String?
+NO
+pincode
+String?
+NO
+country
+String?
+NO
+gstin
+String?
+NO
+GST number (vendor fills)
+pan_number
+String?
+NO
+bank_account_nu
+mber
+String?
+NO
+bank_ifsc
+String?
+NO
+bank_account_na
+me
+String?
+NO
+upi_id
+String?
+NO
+commission_rate
+Decimal
+YES
+total_earnings
+Decimal
+YES
+total_withdrawn
+Decimal
+YES
+pending_balance
+Decimal
+YES
+average_rating
+Decimal
+YES
+total_reviews
+Int
+YES
+total_orders
+Int
+YES
+total_products
+Int
+YES
+is_verified
+Boolean
+YES
+kyc_form_data
+Json?
+NO
+vacation_mode
+Boolean
+YES
+vacation_message
+String?
+NO
+is_active
+Boolean
+YES
+created_at
+DateTime
+YES
+updated_at
+DateTime
+YES
+products
+Product[]
+YES
+order_items
+OrderItem[]
+YES
+vendor_order_item
+s
+VendorOrderI
+tem[]
+YES
+withdrawal_reques
+ts
+WithdrawalRe
+quest[]
+YES
+
+--- PAGE 10 ---
+Field
+Type
+Req
+Notes
+product_reviews
+ProductRevie
+w[]
+YES
+store_followers
+StoreFollowe
+r[]
+YES
+support_tickets
+SupportTicke
+t[]
+YES
+cart_items
+CartItem[]
+YES
+03. Category
+Source: wp_terms + wp_term_taxonomy
+product_cat taxonomy.
+Field
+Type
+Req
+Notes
+id
+Int
+YES
+wp_id
+Int?
+NO
+name
+String
+YES
+slug
+String
+YES
+description
+String?
+NO
+parent_id
+Int?
+NO
+parent
+Category?
+NO
+image_url
+String?
+NO
+display_order
+Int
+YES
+is_active
+Boolean
+YES
+created_at
+DateTime
+YES
+updated_at
+DateTime
+YES
+product_categories
+ProductCateg
+ory[]
+YES
+exam_collections
+ExamCollecti
+on[]
+YES
+04. City
+Source: NEW
+Muzaffarpur, Patna, Boring Road, Others.
+Field
+Type
+Req
+Notes
+id
+Int
+YES
+name
+String
+YES
+slug
+String
+YES
+is_active
+Boolean
+YES
+created_at
+DateTime
+YES
+updated_at
+DateTime
+YES
+pincodes
+Pincode[]
+YES
+product_city_price
+s
+ProductCityP
+rice[]
+YES
+orders
+Order[]
+YES
+cart_items
+CartItem[]
+YES
+
+--- PAGE 11 ---
+05. Pincode
+Source: NEW
+Admin-configurable COD + delivery zone per pincode.
+Field
+Type
+Req
+Notes
+id
+Int
+YES
+pincode
+String
+YES
+city_id
+Int
+YES
+city
+City
+YES
+delivery_zone
+DeliveryZone
+YES
+cod_type
+CodType
+YES
+partial_cod_amoun
+t
+Decimal?
+NO
+set only if cod_type=partial_cod
+is_same_day_eligi
+ble
+Boolean
+YES
+is_delivery_availab
+le
+Boolean
+YES
+created_at
+DateTime
+YES
+updated_at
+DateTime
+YES
+
+--- PAGE 12 ---
+06. Product
+Source: wp_posts + wp_postmeta
+4,986 products. 3,240 have city-wise prices.
+Field
+Type
+Req
+Notes
+id
+Int
+YES
+wp_id
+Int?
+NO
+vendor_id
+Int
+YES
+vendor
+VendorProfil
+e
+YES
+title
+String
+YES
+slug
+String
+YES
+description
+String?
+NO
+short_description
+String?
+NO
+regular_price
+Decimal
+YES
+sale_price
+Decimal?
+NO
+base_price
+Decimal?
+NO
+price before GST (new platform)
+gst_rate
+Decimal
+YES
+0% books, 18% stationery
+hsn_code
+String?
+NO
+both admin + vendor can set
+sku
+String?
+NO
+isbn
+String?
+NO
+author
+String?
+NO
+publisher
+String?
+NO
+edition
+String?
+NO
+language
+String?
+NO
+pages
+Int?
+NO
+binding
+String?
+NO
+genre
+String?
+NO
+book_format
+BookFormat
+YES
+condition
+BookConditio
+n
+YES
+condition_descripti
+on
+String?
+NO
+stock_quantity
+Int
+YES
+manage_stock
+Boolean
+YES
+in_stock
+Boolean
+YES
+sold_count
+Int
+YES
+weight
+Decimal?
+NO
+dimensions
+Json?
+NO
+{length, width, height
+07. ProductCategory
+Source: wp_term_relationships
+Many-to-many join.
+Field
+Type
+Req
+Notes
+product_id
+Int
+YES
+category_id
+Int
+YES
+product
+Product
+YES
+category
+Category
+YES
+
+--- PAGE 13 ---
+08. ProductImage
+Source: wp_postmeta
+image_versions JSON ΓÇö 4 sizes via Lambda+Sharp.
+Field
+Type
+Req
+Notes
+id
+Int
+YES
+wp_id
+Int?
+NO
+product_id
+Int
+YES
+product
+Product
+YES
+image_versions
+Json
+YES
+{thumbnail: url, medium: url, large: url, original: url
+09. ProductAttribute
+Source: wp_postmeta
+book-author, select-format, color, brand, size.
+Field
+Type
+Req
+Notes
+id
+Int
+YES
+product_id
+Int
+YES
+product
+Product
+YES
+attribute_name
+String
+YES
+book-author | select-format | color | brand | size
+attribute_value
+String
+YES
+e.g. "J.K. Rowling" | "Audio" | "Blue"
+created_at
+DateTime
+YES
+10. ProductCityPrice
+Source: wp_postmeta (wcca_city_prices)
+3,240 products with city prices.
+Field
+Type
+Req
+Notes
+id
+Int
+YES
+product_id
+Int
+YES
+city_id
+Int
+YES
+product
+Product
+YES
+city
+City
+YES
+price
+Decimal
+YES
+created_at
+DateTime
+YES
+updated_at
+DateTime
+YES
+
+--- PAGE 14 ---
+11. Order
+Source: wp_wc_orders HPOS
+1,001 orders. 680 guest orders excluded.
+Field
+Type
+Req
+Notes
+id
+Int
+YES
+wp_id
+Int?
+NO
+order_number
+String
+YES
+e.g. KW-2026-00001
+user_id
+Int
+YES
+user
+User
+YES
+status
+OrderStatus
+YES
+payment_status
+PaymentStatu
+s
+YES
+payment_method
+PaymentMetho
+d
+YES
+subtotal
+Decimal
+YES
+shipping_amount
+Decimal
+YES
+cod_charge
+Decimal
+YES
+discount_amount
+Decimal
+YES
+gst_amount
+Decimal
+YES
+product GST
+shipping_gst_amo
+unt
+Decimal
+YES
+18% on shipping
+platform_fee
+Decimal
+YES
+Reserved for future platform charges; 0 by default
+wallet_amount_use
+d
+Decimal
+YES
+total
+Decimal
+YES
+coupon_code
+String?
+NO
+coupon_id
+Int?
+NO
+coupon
+Coupon?
+NO
+is_cod
+Boolean
+YES
+delivery_type
+DeliveryType
+YES
+city_id
+Int?
+NO
+city
+City?
+NO
+pincode
+String?
+NO
+invoice_number
+String?
+NO
+razorpay_order_id
+String?
+NO
+razorpay_payment
+_id
+String?
+NO
+razorpay_signature
+String?
+NO
+cashfree_order_id
+String?
+NO
+cashfree_payment
+_id
+String?
+NO
+expected_delivery_
+date
+DateTime?
+NO
+delivered_at
+DateTime?
+NO
+cancelled_at
+DateTime?
+NO
+cancellation_reaso
+n
+String?
+NO
+refund_amount
+Decimal?
+NO
+refunded_at
+DateTime?
+NO
+
+--- PAGE 15 ---
+Field
+Type
+Req
+Notes
+customer_note
+String?
+NO
+created_at
+DateTime
+YES
+updated_at
+DateTime
+YES
+order_items
+OrderItem[]
+YES
+order_addresses
+OrderAddress
+[]
+YES
+vendor_order_item
+s
+VendorOrderI
+tem[]
+YES
+shipments
+Shipment[]
+YES
+return_requests
+ReturnReques
+t[]
+YES
+wallet_transactions
+WalletTransa
+ction[]
+YES
+coupon_usages
+CouponUsage[
+]
+YES
+12. OrderItem
+Source: wp_woocommerce_order_items
+Product snapshot preserved.
+Field
+Type
+Req
+Notes
+id
+Int
+YES
+wp_id
+Int?
+NO
+order_id
+Int
+YES
+order
+Order
+YES
+product_id
+Int
+YES
+product
+Product
+YES
+vendor_id
+Int
+YES
+vendor
+VendorProfil
+e
+YES
+product_name
+String
+YES
+product_image
+String?
+NO
+sku
+String?
+NO
+unit_price
+Decimal
+YES
+quantity
+Int
+YES
+total_price
+Decimal
+YES
+gst_rate
+Decimal
+YES
+gst_amount
+Decimal
+YES
+status
+OrderItemSta
+tus
+YES
+created_at
+DateTime
+YES
+updated_at
+DateTime
+YES
+vendor_order_item
+VendorOrderI
+tem?
+NO
+return_requests
+ReturnReques
+t[]
+YES
+
+--- PAGE 16 ---
+13. OrderAddress
+Source: wp_wc_order_addresses
+1,976 rows.
+Field
+Type
+Req
+Notes
+id
+Int
+YES
+wp_id
+Int?
+NO
+order_id
+Int
+YES
+order
+Order
+YES
+address_type
+String
+YES
+billing | shipping
+first_name
+String?
+NO
+last_name
+String?
+NO
+company
+String?
+NO
+address_1
+String?
+NO
+address_2
+String?
+NO
+city
+String?
+NO
+state
+String?
+NO
+pincode
+String?
+NO
+country
+String?
+NO
+phone
+String?
+NO
+email
+String?
+NO
+created_at
+DateTime
+YES
+14. VendorOrderItem
+Source: wp_wcfm_marketplace_orders
+1,066 rows. 10% commission confirmed.
+Field
+Type
+Req
+Notes
+id
+Int
+YES
+wp_id
+Int?
+NO
+order_id
+Int
+YES
+order
+Order
+YES
+order_item_id
+Int
+YES
+order_item
+OrderItem
+YES
+vendor_id
+Int
+YES
+vendor
+VendorProfil
+e
+YES
+commission_rate
+Decimal
+YES
+commission_amou
+nt
+Decimal
+YES
+vendor_earning
+Decimal
+YES
+invoice_number
+String?
+NO
+status
+OrderStatus
+YES
+settlement_status
+VendorSettle
+mentStatus
+YES
+settled_at
+DateTime?
+NO
+created_at
+DateTime
+YES
+updated_at
+DateTime
+YES
+
+--- PAGE 17 ---
+15. UserSavedAddress
+Source: wp_usermeta
+billing/shipping address fields.
+Field
+Type
+Req
+Notes
+id
+Int
+YES
+user_id
+Int
+YES
+user
+User
+YES
+label
+String
+YES
+home | work | other
+first_name
+String?
+NO
+last_name
+String?
+NO
+phone
+String?
+NO
+address_1
+String
+YES
+address_2
+String?
+NO
+city
+String
+YES
+state
+String
+YES
+pincode
+String
+YES
+country
+String
+YES
+latitude
+Decimal?
+NO
+longitude
+Decimal?
+NO
+is_default
+Boolean
+YES
+created_at
+DateTime
+YES
+updated_at
+DateTime
+YES
+
+--- PAGE 18 ---
+16. DeliveryPerson
+Source: NEW
+Own same-day delivery team.
+Field
+Type
+Req
+Notes
+id
+Int
+YES
+user_id
+Int
+YES
+user
+User
+YES
+name
+String
+YES
+phone
+String
+YES
+photo
+String?
+NO
+vehicle_type
+String?
+NO
+bike | cycle | auto
+vehicle_number
+String?
+NO
+last_location_lat
+Decimal?
+NO
+last_location_lng
+Decimal?
+NO
+last_location_upda
+te
+DateTime?
+NO
+is_available
+Boolean
+YES
+is_active
+Boolean
+YES
+salary_per_month
+Decimal?
+NO
+per_delivery_charg
+e
+Decimal?
+NO
+per_km_charge
+Decimal?
+NO
+joined_at
+DateTime
+YES
+created_at
+DateTime
+YES
+updated_at
+DateTime
+YES
+shipments
+Shipment[]
+YES
+
+--- PAGE 19 ---
+17. Shipment
+Source: NEW
+Same-day GPS+OTP+photo. Normal Shadowfax.
+Field
+Type
+Req
+Notes
+id
+Int
+YES
+order_id
+Int
+YES
+order
+Order
+YES
+delivery_person_id
+Int?
+NO
+null = Shadowfax/external
+delivery_person
+DeliveryPers
+on?
+NO
+delivery_type
+DeliveryType
+YES
+status
+ShipmentStat
+us
+YES
+tracking_id
+String?
+NO
+shadowfax_order_i
+d
+String?
+NO
+pickup_otp
+String?
+NO
+delivery_otp
+String?
+NO
+otp_verified_at
+DateTime?
+NO
+estimated_delivery
+_date
+DateTime?
+NO
+actual_delivered_at
+DateTime?
+NO
+delivery_photo_url
+String?
+NO
+delivery_attempts
+Int
+YES
+last_attempt_at
+DateTime?
+NO
+failed_reason
+String?
+NO
+rescheduled_for
+DateTime?
+NO
+created_at
+DateTime
+YES
+updated_at
+DateTime
+YES
+
+--- PAGE 20 ---
+18. Coupon
+Source: wp_posts (shop_coupon)
+KITABWALAH, NEW10, BIRTHDAY10, WELCOME30.
+Field
+Type
+Req
+Notes
+id
+Int
+YES
+wp_id
+Int?
+NO
+code
+String
+YES
+description
+String?
+NO
+type
+CouponType
+YES
+value
+Decimal
+YES
+% value or Rs. fixed amount
+min_order_amount
+Decimal?
+NO
+null = no minimum
+max_discount_am
+ount
+Decimal?
+NO
+cap for % coupons (BIRTHDAY10: Rs.50)
+is_user_specific
+Boolean
+YES
+is_birthday_coupo
+n
+Boolean
+YES
+auto-applies in birthday month
+is_first_order_only
+Boolean
+YES
+WELCOME30
+usage_limit
+Int?
+NO
+null = unlimited
+used_count
+Int
+YES
+valid_from
+DateTime?
+NO
+valid_until
+DateTime?
+NO
+is_active
+Boolean
+YES
+created_at
+DateTime
+YES
+updated_at
+DateTime
+YES
+orders
+Order[]
+YES
+coupon_usages
+CouponUsage[
+]
+YES
+user_coupons
+UserCoupon[]
+YES
+19. CouponUsage
+Source: NEW
+Per user per order tracking.
+Field
+Type
+Req
+Notes
+id
+Int
+YES
+coupon_id
+Int
+YES
+coupon
+Coupon
+YES
+user_id
+Int
+YES
+user
+User
+YES
+order_id
+Int
+YES
+order
+Order
+YES
+discount_applied
+Decimal
+YES
+used_at
+DateTime
+YES
+
+--- PAGE 21 ---
+20. UserCoupon
+Source: NEW
+Admin assigns coupons to users.
+Field
+Type
+Req
+Notes
+id
+Int
+YES
+user_id
+Int
+YES
+user
+User
+YES
+coupon_id
+Int
+YES
+coupon
+Coupon
+YES
+assigned_at
+DateTime
+YES
+expires_at
+DateTime?
+NO
+21. ProductReview
+Source: wp_comments
+Vendor notified on new review.
+Field
+Type
+Req
+Notes
+id
+Int
+YES
+wp_id
+Int?
+NO
+product_id
+Int
+YES
+product
+Product
+YES
+user_id
+Int
+YES
+user
+User
+YES
+vendor_id
+Int
+YES
+vendor
+VendorProfil
+e
+YES
+order_id
+Int?
+NO
+verified purchase link
+rating
+Int
+YES
+1-5 stars
+title
+String?
+NO
+content
+String?
+NO
+images
+String[]
+YES
+S3 URLs
+is_verified_purcha
+se
+Boolean
+YES
+status
+String
+YES
+created_at
+DateTime
+YES
+updated_at
+DateTime
+YES
+22. DeviceToken
+Source: NEW
+FCM push notifications (Firebase).
+Field
+Type
+Req
+Notes
+id
+Int
+YES
+user_id
+Int
+YES
+user
+User
+YES
+token
+String
+YES
+platform
+DevicePlatfo
+rm
+YES
+is_active
+Boolean
+YES
+created_at
+DateTime
+YES
+updated_at
+DateTime
+YES
+
+--- PAGE 22 ---
+23. Notification
+Source: NEW
+In-app + push log.
+Field
+Type
+Req
+Notes
+id
+Int
+YES
+user_id
+Int
+YES
+user
+User
+YES
+type
+Notification
+Type
+YES
+title
+String
+YES
+body
+String
+YES
+data
+Json?
+NO
+extra payload e.g. {order_id, product_id
+24. Banner
+Source: NEW
+Homepage banners.
+Field
+Type
+Req
+Notes
+id
+Int
+YES
+title
+String
+YES
+subtitle
+String?
+NO
+image_url
+String
+YES
+action_type
+BannerAction
+Type
+YES
+action_value
+String?
+NO
+product_id | category_id | URL
+display_order
+Int
+YES
+valid_from
+DateTime?
+NO
+valid_until
+DateTime?
+NO
+is_active
+Boolean
+YES
+created_at
+DateTime
+YES
+updated_at
+DateTime
+YES
+25. AppSetting
+Source: wp_options (key rows)
+Seeded from WP options.
+Field
+Type
+Req
+Notes
+id
+Int
+YES
+key
+String
+YES
+value
+String
+YES
+description
+String?
+NO
+created_at
+DateTime
+YES
+updated_at
+DateTime
+YES
+
+--- PAGE 23 ---
+26. Reseller
+Source: NEW
+Reseller affiliate program.
+Field
+Type
+Req
+Notes
+id
+Int
+YES
+user_id
+Int
+YES
+user
+User
+YES
+referral_code
+String
+YES
+total_referrals
+Int
+YES
+total_earnings
+Decimal
+YES
+is_active
+Boolean
+YES
+created_at
+DateTime
+YES
+updated_at
+DateTime
+YES
+referrals
+ResellerRefe
+rral[]
+YES
+27. ResellerReferral
+Source: NEW
+Rs.25 on first order, after delivery.
+Field
+Type
+Req
+Notes
+id
+Int
+YES
+reseller_id
+Int
+YES
+reseller
+Reseller
+YES
+referred_user_id
+Int
+YES
+one user can only be referred once
+referred_user
+User
+YES
+first_order_id
+Int?
+NO
+the qualifying order
+commission_amou
+nt
+Decimal
+YES
+credited_at
+DateTime?
+NO
+set after order delivered
+created_at
+DateTime
+YES
+28. BookSwipe
+Source: NEW
+Fiction swipe game.
+Field
+Type
+Req
+Notes
+id
+Int
+YES
+user_id
+Int
+YES
+user
+User
+YES
+product_id
+Int
+YES
+product
+Product
+YES
+action
+String
+YES
+like | dislike | skip
+created_at
+DateTime
+YES
+
+--- PAGE 24 ---
+29. Wishlist
+Source: NEW
+Replaces wp_wcfm_wishlist.
+Field
+Type
+Req
+Notes
+id
+Int
+YES
+user_id
+Int
+YES
+user
+User
+YES
+product_id
+Int
+YES
+product
+Product
+YES
+created_at
+DateTime
+YES
+30. CompetitiveExam
+Source: NEW
+UPSC, SSC, NEET, JEE, BPSC.
+Field
+Type
+Req
+Notes
+id
+Int
+YES
+name
+String
+YES
+slug
+String
+YES
+description
+String?
+NO
+image_url
+String?
+NO
+display_order
+Int
+YES
+is_active
+Boolean
+YES
+created_at
+DateTime
+YES
+updated_at
+DateTime
+YES
+exam_collections
+ExamCollecti
+on[]
+YES
+31. ExamCollection
+Source: NEW
+Products/categories linked to exams.
+Field
+Type
+Req
+Notes
+id
+Int
+YES
+exam_id
+Int
+YES
+exam
+CompetitiveE
+xam
+YES
+product_id
+Int?
+NO
+product
+Product?
+NO
+category_id
+Int?
+NO
+category
+Category?
+NO
+display_order
+Int
+YES
+added_at
+DateTime
+YES
+
+--- PAGE 25 ---
+32. EmailLog
+Source: wp_wpml_mails
+97 rows migrated.
+Field
+Type
+Req
+Notes
+id
+Int
+YES
+wp_id
+Int?
+NO
+to_email
+String
+YES
+subject
+String
+YES
+message
+String?
+NO
+status
+String?
+NO
+sent | failed
+sent_at
+DateTime?
+NO
+created_at
+DateTime
+YES
+33. StaticPage
+Source: NEW
+About, T&C;, Privacy ΓÇö admin-editable.
+Field
+Type
+Req
+Notes
+id
+Int
+YES
+title
+String
+YES
+slug
+String
+YES
+about-us | terms | privacy
+content
+String
+YES
+meta_title
+String?
+NO
+meta_description
+String?
+NO
+is_active
+Boolean
+YES
+updated_at
+DateTime
+YES
+created_at
+DateTime
+YES
+34. HomepagePin
+Source: NEW
+Option C ΓÇö auto-computed + pin override.
+Field
+Type
+Req
+Notes
+id
+Int
+YES
+type
+HomepinType
+YES
+reference_id
+Int
+YES
+product_id | category_id | banner_id (polymorphic)
+position
+Int
+YES
+display slot number
+is_active
+Boolean
+YES
+created_at
+DateTime
+YES
+updated_at
+DateTime
+YES
+35. SearchHistory
+Source: NEW
+Last 5 searches per user.
+Field
+Type
+Req
+Notes
+id
+Int
+YES
+user_id
+Int
+YES
+user
+User
+YES
+query
+String
+YES
+created_at
+DateTime
+YES
+
+--- PAGE 26 ---
+36. CartItem
+Source: NEW
+Persistent cross-device cart.
+Field
+Type
+Req
+Notes
+id
+Int
+YES
+user_id
+Int
+YES
+user
+User
+YES
+product_id
+Int
+YES
+product
+Product
+YES
+vendor_id
+Int
+YES
+vendor
+VendorProfil
+e
+YES
+quantity
+Int
+YES
+city_id
+Int?
+NO
+city
+City?
+NO
+created_at
+DateTime
+YES
+updated_at
+DateTime
+YES
+37. ReturnRequest
+Source: NEW
+7-day, wrong item, partial returns allowed.
+Field
+Type
+Req
+Notes
+id
+Int
+YES
+order_id
+Int
+YES
+order
+Order
+YES
+order_item_id
+Int
+YES
+order_item
+OrderItem
+YES
+user_id
+Int
+YES
+user
+User
+YES
+reason
+ReturnReason
+YES
+reason_description
+String?
+NO
+proof_images
+String[]
+YES
+S3 photo URLs uploaded by customer
+status
+ReturnReques
+tStatus
+YES
+refund_amount
+Decimal?
+NO
+refund_method
+RefundMethod
+?
+NO
+customer chooses at time of return
+admin_note
+String?
+NO
+reviewed_by_id
+Int?
+NO
+admin user ID (no FK constraint)
+reviewed_at
+DateTime?
+NO
+created_at
+DateTime
+YES
+updated_at
+DateTime
+YES
+
+--- PAGE 27 ---
+38. WalletTransaction
+Source: NEW
+Real money wallet. Razorpay/Cashfree top-up.
+Field
+Type
+Req
+Notes
+id
+Int
+YES
+user_id
+Int
+YES
+user
+User
+YES
+type
+WalletTransa
+ctionType
+YES
+source
+WalletTransa
+ctionSource
+YES
+amount
+Decimal
+YES
+balance_after
+Decimal
+YES
+running balance snapshot
+order_id
+Int?
+NO
+order
+Order?
+NO
+description
+String?
+NO
+transaction_id
+String?
+NO
+Razorpay/Cashfree payment ID for top-ups
+created_at
+DateTime
+YES
+39. WithdrawalRequest
+Source: wp_wcfm_marketplace_withdrawal
+Manual settlement.
+Field
+Type
+Req
+Notes
+id
+Int
+YES
+wp_id
+Int?
+NO
+vendor_id
+Int
+YES
+vendor
+VendorProfil
+e
+YES
+amount
+Decimal
+YES
+status
+WithdrawalSt
+atus
+YES
+requested_at
+DateTime
+YES
+processed_at
+DateTime?
+NO
+admin_note
+String?
+NO
+payment_reference
+String?
+NO
+UTR number or payment ID
+created_at
+DateTime
+YES
+updated_at
+DateTime
+YES
+40. StoreFollower
+Source: wp_wcfm_marketplace_followers
+Users following vendor stores.
+Field
+Type
+Req
+Notes
+id
+Int
+YES
+wp_id
+Int?
+NO
+user_id
+Int
+YES
+user
+User
+YES
+vendor_id
+Int
+YES
+vendor
+VendorProfil
+e
+YES
+created_at
+DateTime
+YES
+
+--- PAGE 28 ---
+41. SupportTicket
+Source: wp_wcfm_enquiry + tickets + CF7
+CF7: 5 active rows.
+Field
+Type
+Req
+Notes
+id
+Int
+YES
+wp_id
+Int?
+NO
+user_id
+Int
+YES
+user
+User
+YES
+vendor_id
+Int?
+NO
+vendor
+VendorProfil
+e?
+NO
+order_id
+Int?
+NO
+subject
+String
+YES
+message
+String
+YES
+status
+SupportTicke
+tStatus
+YES
+resolution_note
+String?
+NO
+created_at
+DateTime
+YES
+updated_at
+DateTime
+YES
+42. IssueReport
+Source: NEW
+User-reported issues.
+Field
+Type
+Req
+Notes
+id
+Int
+YES
+user_id
+Int
+YES
+user
+User
+YES
+order_id
+Int?
+NO
+category
+IssueCategor
+y
+YES
+description
+String
+YES
+status
+SupportTicke
+tStatus
+YES
+resolution_note
+String?
+NO
+created_at
+DateTime
+YES
+updated_at
+DateTime
+YES
+43. PaymentWebhook
+Source: WP Razorpay log
+Migrated + new webhooks.
+Field
+Type
+Req
+Notes
+id
+Int
+YES
+wp_id
+Int?
+NO
+gateway
+String
+YES
+razorpay | cashfree
+event
+String
+YES
+payment.captured | payment.failed etc.
+payload
+Json
+YES
+full webhook JSON
+processed
+Boolean
+YES
+order_id
+Int?
+NO
+resolved order if matched
+created_at
+DateTime
+YES
+
+--- PAGE 29 ---
+44. AdminActionLog
+Source: NEW
+Full admin audit trail.
+Field
+Type
+Req
+Notes
+id
+Int
+YES
+admin_id
+Int
+YES
+admin
+User
+YES
+action_type
+AdminActionT
+ype
+YES
+target_table
+String?
+NO
+target_id
+String?
+NO
+description
+String?
+NO
+old_data
+Json?
+NO
+new_data
+Json?
+NO
+created_at
+DateTime
+YES
+45. Certificate
+Source: WooCommerce LMS
+70 rows ΓÇö kept for verification only.
+Field
+Type
+Req
+Notes
+id
+Int
+YES
+wp_id
+Int?
+NO
+user_id
+Int?
+NO
+FK not enforced ΓÇö migrated user wp_id ref
+user_email
+String?
+NO
+course_title
+String?
+NO
+issued_at
+DateTime?
+NO
+certificate_url
+String?
+NO
+created_at
+DateTime
+YES
+46. MigrationRunLog
+Source: NEW
+Migration script tracking.
+Field
+Type
+Req
+Notes
+id
+Int
+YES
+source_db
+String
+YES
+newdev | usedbooks
+source_table
+String
+YES
+destination_table
+String
+YES
+records_migrated
+Int
+YES
+records_failed
+Int
+YES
+records_skipped
+Int
+YES
+started_at
+DateTime
+YES
+completed_at
+DateTime?
+NO
+status
+MigrationSta
+tus
+YES
+error_log
+String?
+NO
+created_at
+DateTime
+YES
+
+--- PAGE 30 ---
+Migration Source Map
+Source Table
+Destination
+Rows
+Notes
+wp_users + wp_usermeta
+users
+938
+wp_id tracking; migrated users keep password_hash
+wp_wcfm_marketplace_ve
+ndor_data
+vendor_profiles
+~80
+commission_rate=10% confirmed from live data
+wp_posts (product) +
+wp_postmeta
+products +
+product_images +
+product_attributes +
+product_city_prices
+4,986
+3,240 have wcca_city_prices
+wp_terms +
+wp_term_taxonomy
+categories
+~200
+product_cat taxonomy
+wp_wc_orders (HPOS)
+orders
+1,001
+680 guest orders excluded; HPOS confirmed
+wp_woocommerce_order_
+items
+order_items
+~3,000
+product snapshot preserved
+wp_wc_order_addresses
+order_addresses
+1,976
+wp_wcfm_marketplace_or
+ders
+vendor_order_items
+1,066
+10% commission confirmed
+wp_wcfm_marketplace_wit
+hdrawal
+withdrawal_requests
+ΓÇö
+Manual settlement only
+wp_comments (review)
+product_reviews
+ΓÇö
+Vendor notified on new review
+wp_wpml_mails
+email_logs
+97
+wp_posts (shop_coupon)
+coupons
+2
+KITABWALAH + NEW10. Dead coupons dropped.
+wp_wcfm_marketplace_fol
+lowers
+store_followers
+ΓÇö
+wp_wcfm_enquiry + tickets
++ CF7
+support_tickets
+5+
+CF7: 5 active rows
+wp_options (key rows)
+app_settings (seeded)
+~15
+currency, store address, tax settings
+WooCommerce LMS
+certificates
+certificates
+70
+Kept for verification only
+Razorpay webhook log
+payment_webhooks
+ΓÇö
+NOT migrating: 680 guest
+orders
+ΓÇö
+680
+Guest checkout disabled on new platform
+NOT migrating:
+u101172427_HYIpP
+ΓÇö
+135
+users
+Old version excluded by owner decision
+Generated: 11 July 2026 22:21 | 46 models validated | Both databases permanently separate ΓÇö no cross-DB joins.
+
+
+
+========== FILE: c:\Work material\Kitabwalah Admin Portal\usedbooks_schema.pdf ==========
+
+--- PAGE 1 ---
+DATABASE 2
+USEDBOOKS
+Complete Production Schema ΓÇö Final
+42 Models | 30 Enums
+NestJS + PostgreSQL (AWS RDS) + Prisma ORM
+Source: u101172427_UsedBooks (custom-built, not WordPress)
+Migration tracking: ub_id on every migrated table
+Separate database ΓÇö no cross-DB joins with the other platform
+Platform Decisions Built Into Schema
+Decision
+Value / Implementation
+Source DB
+u101172427_UsedBooks ΓÇö custom-built app (NOT WordPress). 149 users, 157 books, 10 orders.
+Platform
+Used books marketplace. Every user is BOTH buyer AND seller. All users get vendor_profiles.
+Commission
+15% platform fee + Rs.8 platform charge per order. Vendor keeps 85% minus Rs.8.
+Delivery
+Rs.49 flat delivery charge (stored in app_settings). Same zone system as kitabwalah.
+COD
+Rs.7 flat per order. Same pincode-based COD rules as kitabwalah.
+GST
+Books 0% GST. products.gst_rate default 0. hsn_code optional.
+Auth
+Passwordless only. Same 3 methods: Phone OTP, Google OAuth, Email OTP.
+Payment
+Razorpay + Cashfree. Wallet top-up. No split payment.
+Delivery System
+SAME as kitabwalah: same-day (own team, GPS+OTP+photo) + normal (Shadowfax). Max attempts 3/1.
+Condition
+REQUIRED on every product ΓÇö no default. like_new / good / acceptable / poor. Migration: fair->acceptable, poor->poor.
+Returns
+SAME policy as kitabwalah: 7 days from delivery. Wrong product only. Partial returns per item.
+Wallet
+Real money wallet. Migrated wallet_balance from old UsedBooks.users. 14 wallet_transactions migrated.
+Messages
+REMOVED ΓÇö owner decision. Old UsedBooks.messages (8 rows) NOT migrated. No messaging on new platform.
+Cart
+Same rule: same vendor+product = increment qty. Different vendors = separate rows.
+Source Tracking
+ub_id on every migrated table. 13 tables have ub_id.
+Separation
+Completely separate PostgreSQL database. No cross-DB joins with kitabwalah. Ever.
+Platform-Specific Features
+Feature
+Detail
+Condition field
+BookCondition enum on products is REQUIRED with no default. System enforces condition on every listing.
+All users = vendor
+role defaults to 'vendor'. Every registered user automatically gets a VendorProfile created.
+platform_fee
+Order.platform_fee defaults to Rs.8. This is charged per order in addition to the 15% commission.
+AppSetting seeds
+UsedBooks.settings (7 rows): delivery_charge=49, commission_rate=15, platform_fee=8 and other config.
+
+--- PAGE 2 ---
+Enums (30 Total)
+UserRole
+customer
+vendor
+admin
+delivery_person
+reseller
+AuthProvider
+phone
+google
+email
+OtpPurpose
+phone_login
+email_verify
+phone_verify
+ProductStatus
+draft
+pending_review
+active
+inactive
+rejected
+BookCondition
+like_new
+good
+acceptable
+poor
+BookFormat
+physical
+audio
+ebook
+OrderStatus
+pending
+confirmed
+processing
+shipped
+out_for_delivery
+delivered
+cancelled
+return_requested
+returned
+OrderItemStatus
+active
+return_requested
+returned
+cancelled
+PaymentStatus
+pending
+paid
+failed
+refunded
+partially_refunded
+DeliveryType
+same_day
+normal
+PaymentMethod
+razorpay
+cashfree
+cod
+wallet
+ShipmentStatus
+pending
+assigned
+picked_up
+in_transit
+out_for_delivery
+delivered
+delivery_failed
+returned_to_seller
+WithdrawalStatus
+pending
+approved
+processing
+completed
+rejected
+CouponType
+percentage
+fixed_amount
+NotificationType
+order_placed
+order_confirmed
+order_shipped
+order_delivered
+order_cancelled
+payment_received
+review_posted
+promotional
+system
+
+--- PAGE 3 ---
+ReturnReason
+wrong_item
+damaged_in_transit
+not_as_described
+missing_pages
+other
+ReturnRequestStatus
+pending
+approved
+rejected
+pickup_scheduled
+picked_up
+refund_initiated
+completed
+RefundMethod
+original_payment
+wallet
+DeliveryZone
+local
+rest_bihar
+south_india
+rest_india
+CodType
+full_cod
+partial_cod
+prepaid_only
+WalletTransactionType
+credit
+debit
+WalletTransactionSource
+order_payment
+order_refund
+referral_reward
+reseller_commission
+top_up
+withdrawal_reversal
+admin_credit
+admin_debit
+VendorSettlementStatus
+pending
+processing
+completed
+failed
+SupportTicketStatus
+open
+in_progress
+resolved
+closed
+IssueCategory
+delivery
+payment
+product
+account
+other
+MigrationStatus
+running
+completed
+failed
+DevicePlatform
+android
+ios
+web
+HomepinType
+product
+category
+banner
+BannerActionType
+product
+category
+url
+none
+AdminActionType
+user_ban
+user_unban
+product_approve
+product_reject
+vendor_verify
+vendor_suspend
+order_refund
+withdrawal_approve
+withdrawal_reject
+coupon_create
+coupon_deactivate
+banner_update
+pincode_update
+settings_update
+
+--- PAGE 4 ---
+Tables (42 Total)
+#
+Table
+Field
+s
+Source
+Key Info
+1
+User
+48
+UsedBooks.users
+149 rows. ALL have phone + Gmail. All are vendor+buyer.
+2
+VendorProfile
+43
+All users
+15% commission default. All 149 users become vendors.
+3
+Category
+13
+UsedBooks.categori
+es
+8 rows migrated.
+4
+City
+11
+UsedBooks.cities
+5 rows migrated.
+5
+Pincode
+11
+NEW
+Same pincode system. Rs.49 default delivery.
+6
+Product
+51
+UsedBooks.books
+157 rows. condition REQUIRED ΓÇö no default.
+7
+ProductCategory
+4
+NEW
+Join table.
+8
+ProductImage
+5
+UsedBooks.books.i
+mages
+JSON string parsed on migration.
+9
+ProductAttribute
+6
+NEW
+1
+0
+ProductCityPrice
+8
+NEW
+City-wise pricing added to platform.
+1
+1
+Order
+47
+UsedBooks.orders
+10 rows. platform_fee default Rs.8. delivery Rs.49.
+1
+2
+OrderItem
+21
+NEW
+condition snapshot added.
+1
+3
+OrderAddress
+15
+NEW
+Not in old DB ΓÇö new feature.
+1
+4
+VendorOrderItem
+17
+NEW
+15% commission derived from orders.
+1
+5
+UserSavedAddress
+18
+NEW
+1
+6
+DeliveryPerson
+20
+NEW
+Same-day delivery team.
+1
+7
+Shipment
+21
+NEW
+Same-day + Shadowfax normal.
+1
+8
+Coupon
+20
+NEW
+Coupon support added to platform.
+1
+9
+CouponUsage
+9
+NEW
+2
+0
+UserCoupon
+7
+NEW
+2
+1
+ProductReview
+16
+NEW
+2
+2
+DeviceToken
+8
+NEW
+FCM push notifications.
+2
+3
+Notification
+10
+UsedBooks.notificati
+ons
+137 rows migrated.
+2
+4
+Banner
+12
+NEW
+2
+5
+AppSetting
+7
+UsedBooks.settings
+7 rows. delivery_charge=49, commission=15, platform_fee=8.
+2
+6
+Reseller
+10
+NEW
+Rs.25 referral credit.
+2
+7
+ResellerReferral
+9
+NEW
+First order only, after delivery.
+2
+8
+BookSwipe
+7
+NEW
+
+--- PAGE 5 ---
+#
+Table
+Field
+s
+Source
+Key Info
+2
+9
+Wishlist
+6
+NEW
+3
+0
+CartItem
+12
+NEW
+Persistent cart.
+3
+1
+ReturnRequest
+18
+NEW
+7-day, wrong item, same policy as kitabwalah.
+3
+2
+WalletTransaction
+13
+UsedBooks.wallet_tr
+ansactions
+14 rows. balance migrated.
+3
+3
+WithdrawalRequest
+12
+UsedBooks.withdra
+wal_requests
+7 rows. Manual settlement.
+3
+4
+SearchHistory
+5
+NEW
+Last 5 per user.
+3
+5
+HomepagePin
+7
+NEW
+3
+6
+StaticPage
+9
+NEW
+3
+7
+EmailLog
+7
+NEW
+3
+8
+SupportTicket
+12
+NEW
+3
+9
+IssueReport
+10
+NEW
+4
+0
+PaymentWebhook
+7
+NEW
+4
+1
+AdminActionLog
+10
+NEW
+4
+2
+MigrationRunLog
+11
+NEW
+
+--- PAGE 6 ---
+Detailed Field Reference
+
+--- PAGE 7 ---
+01. User
+Source: UsedBooks.users
+149 rows. ALL have phone + Gmail. All are vendor+buyer.
+Field
+Type
+Req
+Notes
+id
+Int
+YES
+ub_id
+Int?
+NO
+UsedBooks source user ID
+phone
+String?
+NO
+phone_verified
+Boolean
+YES
+email
+String?
+NO
+email_verified
+Boolean
+YES
+password_hash
+String?
+NO
+legacy migrated users only
+auth_provider
+AuthProvider
+YES
+google_id
+String?
+NO
+display_name
+String
+YES
+first_name
+String?
+NO
+last_name
+String?
+NO
+profile_picture
+String?
+NO
+role
+UserRole
+YES
+referral_code
+String?
+NO
+referred_by_id
+Int?
+NO
+detected_city_id
+Int?
+NO
+detected_pincode
+String?
+NO
+wallet_balance
+Decimal
+YES
+is_active
+Boolean
+YES
+is_banned
+Boolean
+YES
+ban_reason
+String?
+NO
+is_migrated
+Boolean
+YES
+migration_login_do
+ne
+Boolean
+YES
+last_login_at
+DateTime?
+NO
+created_at
+DateTime
+YES
+updated_at
+DateTime
+YES
+referred_by
+User?
+NO
+detected_city
+City?
+NO
+vendor_profile
+VendorProfil
+e?
+NO
+delivery_person
+DeliveryPers
+on?
+NO
+reseller
+Reseller?
+NO
+saved_addresses
+UserSavedAdd
+ress[]
+YES
+device_tokens
+DeviceToken[
+]
+YES
+notifications
+Notification
+[]
+YES
+orders
+Order[]
+YES
+product_reviews
+ProductRevie
+w[]
+YES
+cart_items
+CartItem[]
+YES
+
+--- PAGE 8 ---
+Field
+Type
+Req
+Notes
+wishlists
+Wishlist[]
+YES
+book_swipes
+BookSwipe[]
+YES
+search_history
+SearchHistor
+y[]
+YES
+wallet_transactions
+WalletTransa
+ction[]
+YES
+return_requests
+ReturnReques
+t[]
+YES
+issue_reports
+IssueReport[
+]
+YES
+support_tickets
+SupportTicke
+t[]
+YES
+coupon_usages
+CouponUsage[
+]
+YES
+user_coupons
+UserCoupon[]
+YES
+admin_action_logs
+AdminActionL
+og[]
+YES
+
+--- PAGE 9 ---
+02. VendorProfile
+Source: All users
+15% commission default. All 149 users become vendors.
+Field
+Type
+Req
+Notes
+id
+Int
+YES
+ub_id
+Int?
+NO
+user_id
+Int
+YES
+user
+User
+YES
+store_name
+String
+YES
+store_slug
+String
+YES
+store_description
+String?
+NO
+store_logo
+String?
+NO
+store_banner
+String?
+NO
+phone
+String?
+NO
+address
+String?
+NO
+city
+String?
+NO
+state
+String?
+NO
+pincode
+String?
+NO
+country
+String?
+NO
+gstin
+String?
+NO
+pan_number
+String?
+NO
+bank_account_nu
+mber
+String?
+NO
+bank_ifsc
+String?
+NO
+bank_account_na
+me
+String?
+NO
+upi_id
+String?
+NO
+commission_rate
+Decimal
+YES
+total_earnings
+Decimal
+YES
+total_withdrawn
+Decimal
+YES
+pending_balance
+Decimal
+YES
+average_rating
+Decimal
+YES
+total_reviews
+Int
+YES
+total_orders
+Int
+YES
+total_products
+Int
+YES
+is_verified
+Boolean
+YES
+kyc_form_data
+Json?
+NO
+vacation_mode
+Boolean
+YES
+vacation_message
+String?
+NO
+is_active
+Boolean
+YES
+created_at
+DateTime
+YES
+updated_at
+DateTime
+YES
+products
+Product[]
+YES
+order_items
+OrderItem[]
+YES
+vendor_order_item
+s
+VendorOrderI
+tem[]
+YES
+withdrawal_reques
+ts
+WithdrawalRe
+quest[]
+YES
+
+--- PAGE 10 ---
+Field
+Type
+Req
+Notes
+product_reviews
+ProductRevie
+w[]
+YES
+cart_items
+CartItem[]
+YES
+support_tickets
+SupportTicke
+t[]
+YES
+03. Category
+Source: UsedBooks.categories
+8 rows migrated.
+Field
+Type
+Req
+Notes
+id
+Int
+YES
+ub_id
+Int?
+NO
+UsedBooks categories.id
+name
+String
+YES
+slug
+String
+YES
+description
+String?
+NO
+parent_id
+Int?
+NO
+parent
+Category?
+NO
+image_url
+String?
+NO
+display_order
+Int
+YES
+is_active
+Boolean
+YES
+created_at
+DateTime
+YES
+updated_at
+DateTime
+YES
+product_categories
+ProductCateg
+ory[]
+YES
+04. City
+Source: UsedBooks.cities
+5 rows migrated.
+Field
+Type
+Req
+Notes
+id
+Int
+YES
+ub_id
+Int?
+NO
+UsedBooks cities.id
+name
+String
+YES
+slug
+String
+YES
+is_active
+Boolean
+YES
+created_at
+DateTime
+YES
+updated_at
+DateTime
+YES
+pincodes
+Pincode[]
+YES
+product_city_price
+s
+ProductCityP
+rice[]
+YES
+orders
+Order[]
+YES
+cart_items
+CartItem[]
+YES
+
+--- PAGE 11 ---
+05. Pincode
+Source: NEW
+Same pincode system. Rs.49 default delivery.
+Field
+Type
+Req
+Notes
+id
+Int
+YES
+pincode
+String
+YES
+city_id
+Int
+YES
+city
+City
+YES
+delivery_zone
+DeliveryZone
+YES
+cod_type
+CodType
+YES
+partial_cod_amoun
+t
+Decimal?
+NO
+is_same_day_eligi
+ble
+Boolean
+YES
+is_delivery_availab
+le
+Boolean
+YES
+created_at
+DateTime
+YES
+updated_at
+DateTime
+YES
+
+--- PAGE 12 ---
+06. Product
+Source: UsedBooks.books
+157 rows. condition REQUIRED ΓÇö no default.
+Field
+Type
+Req
+Notes
+id
+Int
+YES
+ub_id
+Int?
+NO
+UsedBooks books.id
+vendor_id
+Int
+YES
+vendor
+VendorProfil
+e
+YES
+title
+String
+YES
+slug
+String
+YES
+description
+String?
+NO
+short_description
+String?
+NO
+regular_price
+Decimal
+YES
+sale_price
+Decimal?
+NO
+base_price
+Decimal?
+NO
+gst_rate
+Decimal
+YES
+used books = 0%
+hsn_code
+String?
+NO
+sku
+String?
+NO
+isbn
+String?
+NO
+author
+String?
+NO
+publisher
+String?
+NO
+edition
+String?
+NO
+language
+String?
+NO
+pages
+Int?
+NO
+binding
+String?
+NO
+genre
+String?
+NO
+book_format
+BookFormat
+YES
+condition
+BookConditio
+n
+YES
+condition_descripti
+on
+String?
+NO
+stock_quantity
+Int
+YES
+typically 1 for used books
+manage_stock
+Boolean
+YES
+in_stock
+Boolean
+YES
+sold_count
+Int
+YES
+weight
+Decimal?
+NO
+dimensions
+Json?
+NO
+status
+ProductStatu
+s
+YES
+returnable
+Boolean
+YES
+return_window
+Int
+YES
+meta_title
+String?
+NO
+meta_description
+String?
+NO
+approved_by_id
+Int?
+NO
+approved_at
+DateTime?
+NO
+rejection_reason
+String?
+NO
+featured_until
+DateTime?
+NO
+
+--- PAGE 13 ---
+Field
+Type
+Req
+Notes
+created_at
+DateTime
+YES
+updated_at
+DateTime
+YES
+product_categories
+ProductCateg
+ory[]
+YES
+images
+ProductImage
+[]
+YES
+attributes
+ProductAttri
+bute[]
+YES
+product_city_price
+s
+ProductCityP
+rice[]
+YES
+order_items
+OrderItem[]
+YES
+product_reviews
+ProductRevie
+w[]
+YES
+cart_items
+CartItem[]
+YES
+wishlists
+Wishlist[]
+YES
+book_swipes
+BookSwipe[]
+YES
+07. ProductCategory
+Source: NEW
+Join table.
+Field
+Type
+Req
+Notes
+product_id
+Int
+YES
+category_id
+Int
+YES
+product
+Product
+YES
+category
+Category
+YES
+08. ProductImage
+Source: UsedBooks.books.images
+JSON string parsed on migration.
+Field
+Type
+Req
+Notes
+id
+Int
+YES
+ub_id
+Int?
+NO
+product_id
+Int
+YES
+product
+Product
+YES
+image_versions
+Json
+YES
+{thumbnail, medium, large, original
+09. ProductAttribute
+Source: NEW
+Field
+Type
+Req
+Notes
+id
+Int
+YES
+product_id
+Int
+YES
+product
+Product
+YES
+attribute_name
+String
+YES
+attribute_value
+String
+YES
+created_at
+DateTime
+YES
+
+--- PAGE 14 ---
+10. ProductCityPrice
+Source: NEW
+City-wise pricing added to platform.
+Field
+Type
+Req
+Notes
+id
+Int
+YES
+product_id
+Int
+YES
+city_id
+Int
+YES
+product
+Product
+YES
+city
+City
+YES
+price
+Decimal
+YES
+created_at
+DateTime
+YES
+updated_at
+DateTime
+YES
+
+--- PAGE 15 ---
+11. Order
+Source: UsedBooks.orders
+10 rows. platform_fee default Rs.8. delivery Rs.49.
+Field
+Type
+Req
+Notes
+id
+Int
+YES
+ub_id
+Int?
+NO
+UsedBooks orders.id
+order_number
+String
+YES
+user_id
+Int
+YES
+user
+User
+YES
+status
+OrderStatus
+YES
+payment_status
+PaymentStatu
+s
+YES
+payment_method
+PaymentMetho
+d
+YES
+subtotal
+Decimal
+YES
+shipping_amount
+Decimal
+YES
+cod_charge
+Decimal
+YES
+discount_amount
+Decimal
+YES
+gst_amount
+Decimal
+YES
+shipping_gst_amo
+unt
+Decimal
+YES
+platform_fee
+Decimal
+YES
+wallet_amount_use
+d
+Decimal
+YES
+total
+Decimal
+YES
+coupon_code
+String?
+NO
+coupon_id
+Int?
+NO
+coupon
+Coupon?
+NO
+is_cod
+Boolean
+YES
+delivery_type
+DeliveryType
+YES
+city_id
+Int?
+NO
+city
+City?
+NO
+pincode
+String?
+NO
+invoice_number
+String?
+NO
+razorpay_order_id
+String?
+NO
+razorpay_payment
+_id
+String?
+NO
+razorpay_signature
+String?
+NO
+cashfree_order_id
+String?
+NO
+cashfree_payment
+_id
+String?
+NO
+expected_delivery_
+date
+DateTime?
+NO
+delivered_at
+DateTime?
+NO
+cancelled_at
+DateTime?
+NO
+cancellation_reaso
+n
+String?
+NO
+refund_amount
+Decimal?
+NO
+refunded_at
+DateTime?
+NO
+
+--- PAGE 16 ---
+Field
+Type
+Req
+Notes
+customer_note
+String?
+NO
+created_at
+DateTime
+YES
+updated_at
+DateTime
+YES
+order_items
+OrderItem[]
+YES
+order_addresses
+OrderAddress
+[]
+YES
+vendor_order_item
+s
+VendorOrderI
+tem[]
+YES
+shipments
+Shipment[]
+YES
+return_requests
+ReturnReques
+t[]
+YES
+wallet_transactions
+WalletTransa
+ction[]
+YES
+coupon_usages
+CouponUsage[
+]
+YES
+12. OrderItem
+Source: NEW
+condition snapshot added.
+Field
+Type
+Req
+Notes
+id
+Int
+YES
+order_id
+Int
+YES
+order
+Order
+YES
+product_id
+Int
+YES
+product
+Product
+YES
+vendor_id
+Int
+YES
+vendor
+VendorProfil
+e
+YES
+product_name
+String
+YES
+product_image
+String?
+NO
+condition
+BookConditio
+n
+YES
+snapshot of condition at order time
+sku
+String?
+NO
+unit_price
+Decimal
+YES
+quantity
+Int
+YES
+total_price
+Decimal
+YES
+gst_rate
+Decimal
+YES
+gst_amount
+Decimal
+YES
+status
+OrderItemSta
+tus
+YES
+created_at
+DateTime
+YES
+updated_at
+DateTime
+YES
+vendor_order_item
+VendorOrderI
+tem?
+NO
+return_requests
+ReturnReques
+t[]
+YES
+
+--- PAGE 17 ---
+13. OrderAddress
+Source: NEW
+Not in old DB ΓÇö new feature.
+Field
+Type
+Req
+Notes
+id
+Int
+YES
+order_id
+Int
+YES
+order
+Order
+YES
+address_type
+String
+YES
+first_name
+String?
+NO
+last_name
+String?
+NO
+address_1
+String?
+NO
+address_2
+String?
+NO
+city
+String?
+NO
+state
+String?
+NO
+pincode
+String?
+NO
+country
+String?
+NO
+phone
+String?
+NO
+email
+String?
+NO
+created_at
+DateTime
+YES
+14. VendorOrderItem
+Source: NEW
+15% commission derived from orders.
+Field
+Type
+Req
+Notes
+id
+Int
+YES
+ub_id
+Int?
+NO
+order_id
+Int
+YES
+order
+Order
+YES
+order_item_id
+Int
+YES
+order_item
+OrderItem
+YES
+vendor_id
+Int
+YES
+vendor
+VendorProfil
+e
+YES
+commission_rate
+Decimal
+YES
+commission_amou
+nt
+Decimal
+YES
+vendor_earning
+Decimal
+YES
+invoice_number
+String?
+NO
+status
+OrderStatus
+YES
+settlement_status
+VendorSettle
+mentStatus
+YES
+settled_at
+DateTime?
+NO
+created_at
+DateTime
+YES
+updated_at
+DateTime
+YES
+
+--- PAGE 18 ---
+15. UserSavedAddress
+Source: NEW
+Field
+Type
+Req
+Notes
+id
+Int
+YES
+user_id
+Int
+YES
+user
+User
+YES
+label
+String
+YES
+first_name
+String?
+NO
+last_name
+String?
+NO
+phone
+String?
+NO
+address_1
+String
+YES
+address_2
+String?
+NO
+city
+String
+YES
+state
+String
+YES
+pincode
+String
+YES
+country
+String
+YES
+latitude
+Decimal?
+NO
+longitude
+Decimal?
+NO
+is_default
+Boolean
+YES
+created_at
+DateTime
+YES
+updated_at
+DateTime
+YES
+16. DeliveryPerson
+Source: NEW
+Same-day delivery team.
+Field
+Type
+Req
+Notes
+id
+Int
+YES
+user_id
+Int
+YES
+user
+User
+YES
+name
+String
+YES
+phone
+String
+YES
+photo
+String?
+NO
+vehicle_type
+String?
+NO
+vehicle_number
+String?
+NO
+last_location_lat
+Decimal?
+NO
+last_location_lng
+Decimal?
+NO
+last_location_upda
+te
+DateTime?
+NO
+is_available
+Boolean
+YES
+is_active
+Boolean
+YES
+salary_per_month
+Decimal?
+NO
+per_delivery_charg
+e
+Decimal?
+NO
+per_km_charge
+Decimal?
+NO
+joined_at
+DateTime
+YES
+created_at
+DateTime
+YES
+updated_at
+DateTime
+YES
+shipments
+Shipment[]
+YES
+
+--- PAGE 19 ---
+17. Shipment
+Source: NEW
+Same-day + Shadowfax normal.
+Field
+Type
+Req
+Notes
+id
+Int
+YES
+order_id
+Int
+YES
+order
+Order
+YES
+delivery_person_id
+Int?
+NO
+delivery_person
+DeliveryPers
+on?
+NO
+delivery_type
+DeliveryType
+YES
+status
+ShipmentStat
+us
+YES
+tracking_id
+String?
+NO
+shadowfax_order_i
+d
+String?
+NO
+pickup_otp
+String?
+NO
+delivery_otp
+String?
+NO
+otp_verified_at
+DateTime?
+NO
+estimated_delivery
+_date
+DateTime?
+NO
+actual_delivered_at
+DateTime?
+NO
+delivery_photo_url
+String?
+NO
+delivery_attempts
+Int
+YES
+last_attempt_at
+DateTime?
+NO
+failed_reason
+String?
+NO
+rescheduled_for
+DateTime?
+NO
+created_at
+DateTime
+YES
+updated_at
+DateTime
+YES
+
+--- PAGE 20 ---
+18. Coupon
+Source: NEW
+Coupon support added to platform.
+Field
+Type
+Req
+Notes
+id
+Int
+YES
+code
+String
+YES
+description
+String?
+NO
+type
+CouponType
+YES
+value
+Decimal
+YES
+min_order_amount
+Decimal?
+NO
+max_discount_am
+ount
+Decimal?
+NO
+is_user_specific
+Boolean
+YES
+is_birthday_coupo
+n
+Boolean
+YES
+is_first_order_only
+Boolean
+YES
+usage_limit
+Int?
+NO
+used_count
+Int
+YES
+valid_from
+DateTime?
+NO
+valid_until
+DateTime?
+NO
+is_active
+Boolean
+YES
+created_at
+DateTime
+YES
+updated_at
+DateTime
+YES
+orders
+Order[]
+YES
+coupon_usages
+CouponUsage[
+]
+YES
+user_coupons
+UserCoupon[]
+YES
+19. CouponUsage
+Source: NEW
+Field
+Type
+Req
+Notes
+id
+Int
+YES
+coupon_id
+Int
+YES
+coupon
+Coupon
+YES
+user_id
+Int
+YES
+user
+User
+YES
+order_id
+Int
+YES
+order
+Order
+YES
+discount_applied
+Decimal
+YES
+used_at
+DateTime
+YES
+
+--- PAGE 21 ---
+20. UserCoupon
+Source: NEW
+Field
+Type
+Req
+Notes
+id
+Int
+YES
+user_id
+Int
+YES
+user
+User
+YES
+coupon_id
+Int
+YES
+coupon
+Coupon
+YES
+assigned_at
+DateTime
+YES
+expires_at
+DateTime?
+NO
+21. ProductReview
+Source: NEW
+Field
+Type
+Req
+Notes
+id
+Int
+YES
+product_id
+Int
+YES
+product
+Product
+YES
+user_id
+Int
+YES
+user
+User
+YES
+vendor_id
+Int
+YES
+vendor
+VendorProfil
+e
+YES
+order_id
+Int?
+NO
+rating
+Int
+YES
+title
+String?
+NO
+content
+String?
+NO
+images
+String[]
+YES
+is_verified_purcha
+se
+Boolean
+YES
+status
+String
+YES
+created_at
+DateTime
+YES
+updated_at
+DateTime
+YES
+22. DeviceToken
+Source: NEW
+FCM push notifications.
+Field
+Type
+Req
+Notes
+id
+Int
+YES
+user_id
+Int
+YES
+user
+User
+YES
+token
+String
+YES
+platform
+DevicePlatfo
+rm
+YES
+is_active
+Boolean
+YES
+created_at
+DateTime
+YES
+updated_at
+DateTime
+YES
+
+--- PAGE 22 ---
+23. Notification
+Source: UsedBooks.notifications
+137 rows migrated.
+Field
+Type
+Req
+Notes
+id
+Int
+YES
+ub_id
+Int?
+NO
+UsedBooks notifications.id
+user_id
+Int
+YES
+user
+User
+YES
+type
+Notification
+Type
+YES
+title
+String
+YES
+body
+String
+YES
+data
+Json?
+NO
+is_read
+Boolean
+YES
+created_at
+DateTime
+YES
+24. Banner
+Source: NEW
+Field
+Type
+Req
+Notes
+id
+Int
+YES
+title
+String
+YES
+subtitle
+String?
+NO
+image_url
+String
+YES
+action_type
+BannerAction
+Type
+YES
+action_value
+String?
+NO
+display_order
+Int
+YES
+valid_from
+DateTime?
+NO
+valid_until
+DateTime?
+NO
+is_active
+Boolean
+YES
+created_at
+DateTime
+YES
+updated_at
+DateTime
+YES
+25. AppSetting
+Source: UsedBooks.settings
+7 rows. delivery_charge=49, commission=15, platform_fee=8.
+Field
+Type
+Req
+Notes
+id
+Int
+YES
+ub_id
+Int?
+NO
+UsedBooks settings.id
+key
+String
+YES
+value
+String
+YES
+description
+String?
+NO
+created_at
+DateTime
+YES
+updated_at
+DateTime
+YES
+
+--- PAGE 23 ---
+26. Reseller
+Source: NEW
+Rs.25 referral credit.
+Field
+Type
+Req
+Notes
+id
+Int
+YES
+user_id
+Int
+YES
+user
+User
+YES
+referral_code
+String
+YES
+total_referrals
+Int
+YES
+total_earnings
+Decimal
+YES
+is_active
+Boolean
+YES
+created_at
+DateTime
+YES
+updated_at
+DateTime
+YES
+referrals
+ResellerRefe
+rral[]
+YES
+27. ResellerReferral
+Source: NEW
+First order only, after delivery.
+Field
+Type
+Req
+Notes
+id
+Int
+YES
+reseller_id
+Int
+YES
+reseller
+Reseller
+YES
+referred_user_id
+Int
+YES
+referred_user
+User
+YES
+first_order_id
+Int?
+NO
+commission_amou
+nt
+Decimal
+YES
+credited_at
+DateTime?
+NO
+created_at
+DateTime
+YES
+28. BookSwipe
+Source: NEW
+Field
+Type
+Req
+Notes
+id
+Int
+YES
+user_id
+Int
+YES
+user
+User
+YES
+product_id
+Int
+YES
+product
+Product
+YES
+action
+String
+YES
+created_at
+DateTime
+YES
+
+--- PAGE 24 ---
+29. Wishlist
+Source: NEW
+Field
+Type
+Req
+Notes
+id
+Int
+YES
+user_id
+Int
+YES
+user
+User
+YES
+product_id
+Int
+YES
+product
+Product
+YES
+created_at
+DateTime
+YES
+30. CartItem
+Source: NEW
+Persistent cart.
+Field
+Type
+Req
+Notes
+id
+Int
+YES
+user_id
+Int
+YES
+user
+User
+YES
+product_id
+Int
+YES
+product
+Product
+YES
+vendor_id
+Int
+YES
+vendor
+VendorProfil
+e
+YES
+quantity
+Int
+YES
+city_id
+Int?
+NO
+city
+City?
+NO
+created_at
+DateTime
+YES
+updated_at
+DateTime
+YES
+
+--- PAGE 25 ---
+31. ReturnRequest
+Source: NEW
+7-day, wrong item, same policy as kitabwalah.
+Field
+Type
+Req
+Notes
+id
+Int
+YES
+order_id
+Int
+YES
+order
+Order
+YES
+order_item_id
+Int
+YES
+order_item
+OrderItem
+YES
+user_id
+Int
+YES
+user
+User
+YES
+reason
+ReturnReason
+YES
+reason_description
+String?
+NO
+proof_images
+String[]
+YES
+status
+ReturnReques
+tStatus
+YES
+refund_amount
+Decimal?
+NO
+refund_method
+RefundMethod
+?
+NO
+admin_note
+String?
+NO
+reviewed_by_id
+Int?
+NO
+reviewed_at
+DateTime?
+NO
+created_at
+DateTime
+YES
+updated_at
+DateTime
+YES
+32. WalletTransaction
+Source: UsedBooks.wallet_transactions
+14 rows. balance migrated.
+Field
+Type
+Req
+Notes
+id
+Int
+YES
+ub_id
+Int?
+NO
+UsedBooks wallet_transactions.id
+user_id
+Int
+YES
+user
+User
+YES
+type
+WalletTransa
+ctionType
+YES
+source
+WalletTransa
+ctionSource
+YES
+amount
+Decimal
+YES
+balance_after
+Decimal
+YES
+order_id
+Int?
+NO
+order
+Order?
+NO
+description
+String?
+NO
+transaction_id
+String?
+NO
+created_at
+DateTime
+YES
+
+--- PAGE 26 ---
+33. WithdrawalRequest
+Source: UsedBooks.withdrawal_requests
+7 rows. Manual settlement.
+Field
+Type
+Req
+Notes
+id
+Int
+YES
+ub_id
+Int?
+NO
+vendor_id
+Int
+YES
+vendor
+VendorProfil
+e
+YES
+amount
+Decimal
+YES
+status
+WithdrawalSt
+atus
+YES
+requested_at
+DateTime
+YES
+processed_at
+DateTime?
+NO
+admin_note
+String?
+NO
+payment_reference
+String?
+NO
+created_at
+DateTime
+YES
+updated_at
+DateTime
+YES
+34. SearchHistory
+Source: NEW
+Last 5 per user.
+Field
+Type
+Req
+Notes
+id
+Int
+YES
+user_id
+Int
+YES
+user
+User
+YES
+query
+String
+YES
+created_at
+DateTime
+YES
+35. HomepagePin
+Source: NEW
+Field
+Type
+Req
+Notes
+id
+Int
+YES
+type
+HomepinType
+YES
+reference_id
+Int
+YES
+position
+Int
+YES
+is_active
+Boolean
+YES
+created_at
+DateTime
+YES
+updated_at
+DateTime
+YES
+
+--- PAGE 27 ---
+36. StaticPage
+Source: NEW
+Field
+Type
+Req
+Notes
+id
+Int
+YES
+title
+String
+YES
+slug
+String
+YES
+content
+String
+YES
+meta_title
+String?
+NO
+meta_description
+String?
+NO
+is_active
+Boolean
+YES
+updated_at
+DateTime
+YES
+created_at
+DateTime
+YES
+37. EmailLog
+Source: NEW
+Field
+Type
+Req
+Notes
+id
+Int
+YES
+to_email
+String
+YES
+subject
+String
+YES
+message
+String?
+NO
+status
+String?
+NO
+sent_at
+DateTime?
+NO
+created_at
+DateTime
+YES
+38. SupportTicket
+Source: NEW
+Field
+Type
+Req
+Notes
+id
+Int
+YES
+user_id
+Int
+YES
+user
+User
+YES
+vendor_id
+Int?
+NO
+vendor
+VendorProfil
+e?
+NO
+order_id
+Int?
+NO
+subject
+String
+YES
+message
+String
+YES
+status
+SupportTicke
+tStatus
+YES
+resolution_note
+String?
+NO
+created_at
+DateTime
+YES
+updated_at
+DateTime
+YES
+
+--- PAGE 28 ---
+39. IssueReport
+Source: NEW
+Field
+Type
+Req
+Notes
+id
+Int
+YES
+user_id
+Int
+YES
+user
+User
+YES
+order_id
+Int?
+NO
+category
+IssueCategor
+y
+YES
+description
+String
+YES
+status
+SupportTicke
+tStatus
+YES
+resolution_note
+String?
+NO
+created_at
+DateTime
+YES
+updated_at
+DateTime
+YES
+40. PaymentWebhook
+Source: NEW
+Field
+Type
+Req
+Notes
+id
+Int
+YES
+gateway
+String
+YES
+event
+String
+YES
+payload
+Json
+YES
+processed
+Boolean
+YES
+order_id
+Int?
+NO
+created_at
+DateTime
+YES
+41. AdminActionLog
+Source: NEW
+Field
+Type
+Req
+Notes
+id
+Int
+YES
+admin_id
+Int
+YES
+admin
+User
+YES
+action_type
+AdminActionT
+ype
+YES
+target_table
+String?
+NO
+target_id
+String?
+NO
+description
+String?
+NO
+old_data
+Json?
+NO
+new_data
+Json?
+NO
+created_at
+DateTime
+YES
+
+--- PAGE 29 ---
+42. MigrationRunLog
+Source: NEW
+Field
+Type
+Req
+Notes
+id
+Int
+YES
+source_table
+String
+YES
+destination_table
+String
+YES
+records_migrated
+Int
+YES
+records_failed
+Int
+YES
+records_skipped
+Int
+YES
+started_at
+DateTime
+YES
+completed_at
+DateTime?
+NO
+status
+MigrationSta
+tus
+YES
+error_log
+String?
+NO
+created_at
+DateTime
+YES
+
+--- PAGE 30 ---
+Migration Source Map
+Source Table
+Destination
+Rows
+Notes
+UsedBooks.users
+users +
+vendor_profiles
+149
+All have phone + Gmail. All become vendors. role=vendor default.
+UsedBooks.books
+products +
+product_images +
+product_city_prices
+157
+condition REQUIRED. images JSON -> parsed into product_images rows.
+UsedBooks.categories
+categories
+8
+ub_id tracking
+UsedBooks.cities
+cities
+5
+ub_id tracking
+UsedBooks.orders
+orders + order_items
++ vendor_order_items
+10
+platform_fee=Rs.8, delivery=Rs.49. razorpay_signature migrated.
+UsedBooks.wallet_transac
+tions
+wallet_transactions
+14
+ub_id tracking. wallet_balance on users migrated.
+UsedBooks.withdrawal_re
+quests
+withdrawal_requests
+7
+Manual settlement.
+UsedBooks.notifications
+notifications
+137
+ub_id tracking
+UsedBooks.messages
+NOT migrated ΓÇö
+messaging feature
+excluded
+8
+Owner decision: messaging system removed from new platform.
+UsedBooks.settings
+app_settings
+7
+delivery_charge, commission_rate, platform_fee seeded.
+UsedBooks.user_activity
+admin_action_logs
+(partial)
+277
+Behavioral logs ΓÇö relevant events migrated to audit log.
+NOT migrating
+ΓÇö
+ΓÇö
+Guest checkout disabled. No guest orders in old DB.
+Generated: 11 July 2026 22:21 | 42 models validated | Both databases permanently separate ΓÇö no cross-DB joins.
+

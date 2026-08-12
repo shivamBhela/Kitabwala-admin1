@@ -1,0 +1,16 @@
+{
+  "name": "kitabwalah-admin-portal",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Runs the kitabwalah-api backend and kitabwalah-admin frontend together for local dev.",
+  "scripts": {
+    "predev": "node scripts/free-dev-ports.js",
+    "dev": "concurrently -n API,WEB -c blue.bold,yellow.bold --kill-others-on-fail \"npm run start:dev --prefix backend\" \"npm run dev --prefix frontend\"",
+    "dev:api": "npm run start:dev --prefix backend",
+    "predev:web": "node scripts/free-dev-ports.js",
+    "dev:web": "npm run dev --prefix frontend"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.0"
+  }
+}

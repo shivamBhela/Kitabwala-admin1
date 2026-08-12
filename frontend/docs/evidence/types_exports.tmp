@@ -1,0 +1,52 @@
+﻿export type UserRole = 'customer' | 'vendor' | 'admin' | 'delivery_person' | 'reseller';
+export type ProductStatus = 'draft' | 'pending_review' | 'active' | 'inactive' | 'rejected';
+export type BookCondition = 'new_condition' | 'like_new' | 'good' | 'acceptable' | 'poor';
+export type BookFormat = 'physical' | 'audio' | 'ebook';
+export type OrderStatus =
+export type OrderItemStatus = 'active' | 'return_requested' | 'returned' | 'cancelled';
+export type PaymentStatus = 'pending' | 'paid' | 'failed' | 'refunded' | 'partially_refunded';
+export type DeliveryType = 'same_day' | 'normal';
+export type PaymentMethod = 'razorpay' | 'cashfree' | 'cod' | 'wallet';
+export type ShipmentStatus =
+export type WithdrawalStatus = 'pending' | 'approved' | 'processing' | 'completed' | 'rejected';
+export type CouponType = 'percentage' | 'fixed_amount';
+export type NotificationType =
+export type ReturnReason =
+export type ReturnRequestStatus =
+export type RefundMethod = 'original_payment' | 'wallet';
+export type DeliveryZone = 'local' | 'rest_bihar' | 'south_india' | 'rest_india';
+export type CodType = 'full_cod' | 'partial_cod' | 'prepaid_only';
+export type WalletTransactionType = 'credit' | 'debit';
+export type WalletTransactionSource =
+export type VendorSettlementStatus = 'pending' | 'processing' | 'completed' | 'failed';
+export type SupportTicketStatus = 'open' | 'in_progress' | 'resolved' | 'closed';
+export type IssueCategory = 'delivery' | 'payment' | 'product' | 'account' | 'other';
+export type MigrationStatus = 'running' | 'completed' | 'failed';
+export type HomepinType = 'product' | 'category' | 'banner';
+export type BannerActionType = 'product' | 'category' | 'url' | 'none';
+export type AdminActionType =
+export interface User {
+export interface VendorProfile {
+export interface Category {
+export interface City {
+export interface Pincode {
+export interface Product {
+export interface OrderItem {
+export interface OrderAddress {
+export interface Order {
+export interface DeliveryPerson {
+export interface Shipment {
+export interface ReturnRequest {
+export interface WithdrawalRequest {
+export interface Coupon {
+export interface Banner {
+export interface HomepagePin {
+export interface ProductReview {
+export interface SupportTicket {
+export interface IssueReport {
+export interface CompetitiveExam {
+export interface AppSetting {
+export interface PushNotificationLog {
+export interface AdminActionLog {
+export interface EmailLog {
+export interface MigrationLog {

@@ -1,0 +1,33 @@
+import { BookCondition, BookFormat } from '@prisma/client';
+export declare class CreateProductDto {
+    vendor_id: number;
+    title: string;
+    slug: string;
+    description?: string;
+    short_description?: string;
+    regular_price: number;
+    sale_price?: number;
+    base_price?: number;
+    gst_rate?: number;
+    hsn_code?: string;
+    sku?: string;
+    isbn?: string;
+    author?: string;
+    publisher?: string;
+    edition?: string;
+    language?: string;
+    pages?: number;
+    binding?: string;
+    genre?: string;
+    book_format: BookFormat;
+    condition: BookCondition;
+    condition_description?: string;
+    stock_quantity?: number;
+    manage_stock?: boolean;
+    in_stock?: boolean;
+    weight?: number;
+    dimensions?: Record<string, unknown>;
+    meta_title?: string;
+    meta_description?: string;
+    category_ids?: number[];
+}

@@ -1,0 +1,97 @@
+﻿app
+components
+config
+constants
+docs
+hooks
+lib
+providers
+public
+store
+styles
+types
+utils
+.env.example
+.env.local
+.prettierrc
+eslint.config.mjs
+folder_tree.txt
+next-env.d.ts
+next.config.ts
+package-lock.json
+package.json
+postcss.config.mjs
+README.md
+tsconfig.json
+tsconfig.tsbuildinfo
+  error.tsx
+  favicon.ico
+  global-error.tsx
+  globals.css
+  layout.tsx
+  loading.tsx
+  not-found.tsx
+  page.tsx
+  sections
+  Header.tsx
+  Sidebar.tsx
+    AppSettingsSection.tsx
+    AuditLogsSection.tsx
+    BannersSection.tsx
+    CouponsSection.tsx
+    DashboardSection.tsx
+    DeliverySection.tsx
+    EmailLogsSection.tsx
+    ExamsSection.tsx
+    HomepagePinsSection.tsx
+    MigrationLogsSection.tsx
+    NotificationsSection.tsx
+    OrdersSection.tsx
+    PincodesSection.tsx
+    ProductsSection.tsx
+    ReturnsSection.tsx
+    ReviewsSection.tsx
+    SchemaRefSection.tsx
+    StaticPagesSection.tsx
+    SupportSection.tsx
+    UsersSection.tsx
+    VendorsSection.tsx
+    WithdrawalsSection.tsx
+  site.ts
+  app.ts
+  navigation.ts
+  evidence
+    screenshots
+    build_output.txt
+    component_count.txt
+    file_count.txt
+    folder_tree.txt
+    lint_output.txt
+    typecheck_output.txt
+  useDebounce.ts
+  useDisclosure.ts
+  useLocalStorage.ts
+  useMediaQuery.ts
+  usePagination.ts
+  animations.ts
+  axios.ts
+  mockData.ts
+  queryClient.ts
+  store.tsx
+  types.ts
+  utils.ts
+  index.tsx
+  QueryProvider.tsx
+  ThemeProvider.tsx
+  file.svg
+  globe.svg
+  next.svg
+  vercel.svg
+  window.svg
+  useUIStore.ts
+  theme.css
+  api.ts
+  enums.ts
+  index.ts
+  format.ts
+  validators.ts
