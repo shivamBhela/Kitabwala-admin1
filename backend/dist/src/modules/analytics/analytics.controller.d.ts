@@ -26,7 +26,7 @@ export declare class AnalyticsController {
             created_at: string;
         }[];
         revenueTrend: {
-            day: any;
+            day: string;
             revenue: number;
         }[];
     }>;

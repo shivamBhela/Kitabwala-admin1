@@ -31,7 +31,7 @@ export declare class AnalyticsService {
             created_at: string;
         }[];
         revenueTrend: {
-            day: any;
+            day: string;
             revenue: number;
         }[];
     }>;
