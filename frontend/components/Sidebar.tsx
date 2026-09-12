@@ -4,6 +4,8 @@ import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { useAdminStore } from '@/lib/store';
 import { useUIStore } from '@/store/useUIStore';
+import { useQuery } from '@tanstack/react-query';
+import { getProducts } from '@/services/productService';
 import { cn } from '@/lib/utils';
 import { Badge, type BadgeVariant } from '@/components/ui/badge';
 import {
@@ -145,7 +147,6 @@ export default function Sidebar() {
   const {
     activeTab,
     setActiveTab,
-    products,
     vendors,
     withdrawalRequests,
     returnRequests,
@@ -157,7 +158,11 @@ export default function Sidebar() {
 
   const [query, setQuery] = useState('');
 
-  const pendingProductsCount = products.filter((p) => p.status === 'pending_review').length;
+  const { data: pendingProductsData } = useQuery({
+    queryKey: ['products', 'pending_review'],
+    queryFn: () => getProducts({ status: 'pending_review', limit: 1 }),
+  });
+  const pendingProductsCount = pendingProductsData?.meta.total ?? 0;
   const pendingKycCount = vendors.filter((v) => !v.is_verified).length;
   const pendingWithdrawalsCount = withdrawalRequests.filter((w) => w.status === 'pending').length;
   const pendingReturnsCount = returnRequests.filter((r) => r.status === 'pending').length;

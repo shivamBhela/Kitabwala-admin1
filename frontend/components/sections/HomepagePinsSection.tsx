@@ -2,11 +2,15 @@
 
 import React, { useState } from 'react';
 import { useAdminStore } from '@/lib/store';
+import { useQuery } from '@tanstack/react-query';
 import { HomepinType } from '@/lib/types';
+import { getProducts } from '@/services/productService';
 import { Pin, Plus, Trash2, ShieldCheck, Sparkles, Layers } from 'lucide-react';
 
 export default function HomepagePinsSection() {
-  const { homepagePins, addHomepagePin, removeHomepagePin, products, categories, banners } = useAdminStore();
+  const { homepagePins, addHomepagePin, removeHomepagePin, categories, banners } = useAdminStore();
+  const { data: productsData } = useQuery({ queryKey: ['products'], queryFn: () => getProducts({ limit: 200 }) });
+  const products = productsData?.data ?? [];
 
   const [showModal, setShowModal] = useState(false);
   const [type, setType] = useState<HomepinType>('product');
@@ -17,7 +21,7 @@ export default function HomepagePinsSection() {
     e.preventDefault();
     const refTitle =
       type === 'product'
-        ? products.find((p) => p.id === referenceId)?.title || referenceId
+        ? products.find((p) => String(p.id) === referenceId)?.title || referenceId
         : type === 'category'
         ? categories.find((c) => c.id === referenceId)?.name || referenceId
         : banners.find((b) => b.id === referenceId)?.title || referenceId;

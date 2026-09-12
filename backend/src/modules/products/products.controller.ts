@@ -44,6 +44,12 @@ export class ProductsController {
     return this.productsService.update(id, dto, user.sub);
   }
 
+  @Delete(':id')
+  @RequirePermission(Permission.PRODUCTS_MANAGE)
+  remove(@Param('id', ParseIntPipe) id: number, @CurrentUser() user: AuthenticatedUser) {
+    return this.productsService.remove(id, user.sub);
+  }
+
   @Patch(':id/approve')
   @RequirePermission(Permission.PRODUCTS_MANAGE)
   approve(@Param('id', ParseIntPipe) id: number, @CurrentUser() user: AuthenticatedUser) {

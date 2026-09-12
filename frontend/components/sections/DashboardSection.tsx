@@ -1,6 +1,7 @@
 'use client';
 
 import { useMemo } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
 import { format, parseISO } from 'date-fns';
 import {
@@ -14,6 +15,7 @@ import {
   YAxis,
 } from 'recharts';
 import { useAdminStore } from '@/lib/store';
+import { getProducts } from '@/services/productService';
 import { cn } from '@/lib/utils';
 import { formatCurrency, formatCurrencyCompact, formatNumber } from '@/utils/format';
 import { staggerContainer, slideUp, pageTransition } from '@/lib/animations';
@@ -89,11 +91,16 @@ export default function DashboardSection() {
     orders,
     users,
     vendors,
-    products,
     withdrawalRequests,
     returnRequests,
     setActiveTab,
   } = useAdminStore();
+
+  const { data: productsData } = useQuery({
+    queryKey: ['products'],
+    queryFn: () => getProducts({ limit: 200 }),
+  });
+  const products = productsData?.data ?? [];
 
   const deliveredOrders = orders.filter((o) => o.status === 'delivered');
   const totalRevenue = deliveredOrders.reduce((sum, o) => sum + o.total, 0);

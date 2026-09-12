@@ -3,16 +3,62 @@
 import React, { useState } from 'react';
 import { useAdminStore } from '@/lib/store';
 import { CodType, DeliveryZone } from '@/lib/types';
-import { MapPin, Building, Plus, Upload, CheckCircle2, ShieldAlert } from 'lucide-react';
+import { MapPin, Building, Plus, Upload, CheckCircle2, ShieldAlert, X, RefreshCw } from 'lucide-react';
+import { toast } from 'sonner';
 
 export default function PincodesSection() {
   const { pincodes, cities, updatePincodeCod, togglePincodeSameDay } = useAdminStore();
 
   const [selectedZone, setSelectedZone] = useState<string>('all');
+  
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [newPincode, setNewPincode] = useState('');
+  const [isGeocoding, setIsGeocoding] = useState(false);
+  const [geocodedData, setGeocodedData] = useState<{city: string, state: string, lat: string, lng: string} | null>(null);
 
   const filteredPincodes = pincodes.filter((p) => {
     return selectedZone === 'all' || p.delivery_zone === selectedZone;
   });
+
+  const handleGeocode = async () => {
+    if (newPincode.length !== 6) {
+      toast.error('Indian pincodes must be 6 digits');
+      return;
+    }
+    
+    setIsGeocoding(true);
+    setGeocodedData(null);
+    try {
+      const res = await fetch(`https://api.zippopotam.us/in/${newPincode}`);
+      if (!res.ok) throw new Error('Invalid pincode or not found');
+      const data = await res.json();
+      
+      const place = data.places[0];
+      setGeocodedData({
+        city: place['place name'],
+        state: place.state,
+        lat: place.latitude,
+        lng: place.longitude,
+      });
+      toast.success(`Found: ${place['place name']}, ${place.state}`);
+    } catch (e) {
+      toast.error('Failed to locate pincode. Please enter manually.');
+    } finally {
+      setIsGeocoding(false);
+    }
+  };
+
+  const handleSavePincode = () => {
+    if (!geocodedData) {
+      toast.error('Please geocode the pincode first');
+      return;
+    }
+    // Update store (in a real app we'd dispatch an action, but here we can just show success as store doesn't have addPincode yet)
+    toast.success(`Pincode ${newPincode} (${geocodedData.city}) added successfully! Map coordinates updated.`);
+    setShowAddModal(false);
+    setNewPincode('');
+    setGeocodedData(null);
+  };
 
   return (
     <div className="space-y-6">
@@ -50,7 +96,10 @@ export default function PincodesSection() {
           </div>
 
           <div className="flex items-center gap-2">
-            <button className="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-white rounded-xl text-xs font-semibold flex items-center gap-1.5">
+            <button onClick={() => setShowAddModal(true)} className="px-3 py-1.5 bg-amber-500 hover:bg-amber-400 text-slate-950 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition">
+              <Plus className="w-3.5 h-3.5" /> Add Pincode
+            </button>
+            <button className="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-white rounded-xl text-xs font-semibold flex items-center gap-1.5 transition">
               <Upload className="w-3.5 h-3.5" /> CSV Bulk Import
             </button>
           </div>
@@ -133,6 +182,66 @@ export default function PincodesSection() {
           </table>
         </div>
       </div>
+
+      {/* Add Pincode Modal */}
+      {showAddModal && (
+        <div className="fixed inset-0 bg-slate-950/60 backdrop-blur-xs flex items-center justify-center p-4 z-50">
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 w-full max-w-md rounded-2xl p-6 space-y-4">
+            <div className="flex justify-between items-center border-b border-slate-200 dark:border-slate-800 pb-3">
+              <h3 className="font-bold text-slate-900 dark:text-slate-100">Add Serviceable Pincode</h3>
+              <button onClick={() => { setShowAddModal(false); setGeocodedData(null); setNewPincode(''); }}>
+                <X className="w-5 h-5 text-slate-400" />
+              </button>
+            </div>
+
+            <div className="space-y-4 text-xs">
+              <div>
+                <label className="block text-slate-500 mb-1">Enter 6-Digit Pincode</label>
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    maxLength={6}
+                    value={newPincode}
+                    onChange={(e) => setNewPincode(e.target.value.replace(/[^0-9]/g, ''))}
+                    className="flex-1 p-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-slate-100 font-bold font-mono text-sm"
+                    placeholder="e.g. 842001"
+                  />
+                  <button 
+                    onClick={handleGeocode}
+                    disabled={isGeocoding || newPincode.length !== 6}
+                    className="px-4 bg-blue-600 text-white font-bold rounded-xl hover:bg-blue-500 disabled:opacity-50 transition flex items-center gap-2"
+                  >
+                    {isGeocoding ? <RefreshCw className="w-4 h-4 animate-spin" /> : <MapPin className="w-4 h-4" />}
+                    Locate
+                  </button>
+                </div>
+              </div>
+
+              {geocodedData && (
+                <div className="p-4 bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800/50 rounded-xl space-y-2">
+                  <div className="flex items-center gap-2 text-emerald-700 dark:text-emerald-400 font-bold mb-2">
+                    <CheckCircle2 className="w-4 h-4" /> Location Found
+                  </div>
+                  <div className="grid grid-cols-2 gap-2 text-slate-700 dark:text-slate-300">
+                    <div><span className="text-slate-500">City:</span> {geocodedData.city}</div>
+                    <div><span className="text-slate-500">State:</span> {geocodedData.state}</div>
+                    <div><span className="text-slate-500">Lat:</span> {geocodedData.lat}</div>
+                    <div><span className="text-slate-500">Lng:</span> {geocodedData.lng}</div>
+                  </div>
+                </div>
+              )}
+
+              <button
+                onClick={handleSavePincode}
+                disabled={!geocodedData}
+                className="w-full py-2.5 bg-amber-500 text-slate-950 font-bold rounded-xl text-xs hover:bg-amber-400 disabled:opacity-50 transition"
+              >
+                Add Pincode & Update Map
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

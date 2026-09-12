@@ -15,8 +15,10 @@ import {
   ChevronDown,
   Plus,
   Moon,
+  Sun,
   X,
 } from 'lucide-react';
+import { useTheme } from 'next-themes';
 
 interface HeaderProps {
   adminUser?: string;
@@ -39,6 +41,7 @@ const QUICK_ADD_ITEMS: { id: string; label: string }[] = [
 
 export default function Header({ adminUser = 'Super Admin', onLogout }: HeaderProps) {
   const { activeTab, auditLogs, setActiveTab } = useAdminStore();
+  const { theme, setTheme } = useTheme();
 
   const [openMenu, setOpenMenu] = useState<OpenMenu>('none');
   const [searchQuery, setSearchQuery] = useState('');
@@ -320,19 +323,16 @@ export default function Header({ adminUser = 'Super Admin', onLogout }: HeaderPr
             </AnimatePresence>
           </div>
 
-          {/* Dark mode — kill-switch in globals.css forces light mode app-wide today,
-              so this is an honestly-disabled control rather than a toggle that silently
-              does nothing (or fights the kill-switch). */}
-          <span title="Dark mode — coming soon" className="inline-flex">
+          <span title={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`} className="inline-flex">
             <Button
               type="button"
               variant="ghost"
               size="icon"
-              disabled
-              aria-label="Dark mode (coming soon)"
-              className="rounded-full bg-black/10 hover:bg-black/10 text-foreground disabled:opacity-70"
+              onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+              aria-label="Toggle Dark Mode"
+              className="rounded-full bg-black/10 hover:bg-black/15 text-foreground transition-colors"
             >
-              <Moon className="w-4 h-4" />
+              {theme === 'dark' ? <Sun className="w-4 h-4 text-foreground" /> : <Moon className="w-4 h-4 text-foreground" />}
             </Button>
           </span>
 

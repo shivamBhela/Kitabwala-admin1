@@ -388,6 +388,9 @@ export declare class ProductsService {
         approved_by_id: number | null;
         approved_at: Date | null;
     }>;
+    remove(id: number, adminId: number): Promise<{
+        success: boolean;
+    }>;
     private mapWriteError;
     approve(id: number, adminId: number): Promise<{
         vendor: {

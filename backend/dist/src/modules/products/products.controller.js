@@ -42,6 +42,9 @@ let ProductsController = class ProductsController {
     update(id, dto, user) {
         return this.productsService.update(id, dto, user.sub);
     }
+    remove(id, user) {
+        return this.productsService.remove(id, user.sub);
+    }
     approve(id, user) {
         return this.productsService.approve(id, user.sub);
     }
@@ -103,6 +106,15 @@ __decorate([
     __metadata("design:paramtypes", [Number, update_product_dto_1.UpdateProductDto, Object]),
     __metadata("design:returntype", void 0)
 ], ProductsController.prototype, "update", null);
+__decorate([
+    (0, common_1.Delete)(':id'),
+    (0, require_permission_decorator_1.RequirePermission)(permissions_1.Permission.PRODUCTS_MANAGE),
+    __param(0, (0, common_1.Param)('id', common_1.ParseIntPipe)),
+    __param(1, (0, current_user_decorator_1.CurrentUser)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Number, Object]),
+    __metadata("design:returntype", void 0)
+], ProductsController.prototype, "remove", null);
 __decorate([
     (0, common_1.Patch)(':id/approve'),
     (0, require_permission_decorator_1.RequirePermission)(permissions_1.Permission.PRODUCTS_MANAGE),

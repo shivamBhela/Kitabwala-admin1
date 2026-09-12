@@ -4,7 +4,6 @@ import React, { createContext, useContext, useState, ReactNode } from 'react';
 import {
   User,
   VendorProfile,
-  Product,
   Order,
   DeliveryPerson,
   Shipment,
@@ -29,7 +28,6 @@ import {
 import {
   mockUsers,
   mockVendors,
-  mockProducts,
   mockOrders,
   mockDeliveryPersons,
   mockShipments,
@@ -59,7 +57,6 @@ export interface AdminStoreContextType {
   // Datasets
   users: User[];
   vendors: VendorProfile[];
-  products: Product[];
   categories: Category[];
   orders: Order[];
   deliveryPersons: DeliveryPerson[];
@@ -83,9 +80,6 @@ export interface AdminStoreContextType {
 
   // Actions
   toggleUserBan: (userId: string, reason?: string) => void;
-  approveProduct: (productId: string) => void;
-  rejectProduct: (productId: string, reason: string) => void;
-  updateProductCityPrices: (productId: string, cityPrices: Record<string, number>) => void;
   verifyVendorKyc: (vendorId: string) => void;
   toggleVendorActive: (vendorId: string) => void;
   updateVendorCommission: (vendorId: string, rate: number) => void;
@@ -127,7 +121,6 @@ export function AdminStoreProvider({ children }: { children: ReactNode }) {
 
   const [users, setUsers] = useState<User[]>(mockUsers);
   const [vendors, setVendors] = useState<VendorProfile[]>(mockVendors);
-  const [products, setProducts] = useState<Product[]>(mockProducts);
   const [categories] = useState<Category[]>(mockCategories);
   const [orders, setOrders] = useState<Order[]>(mockOrders);
   const [deliveryPersons] = useState<DeliveryPerson[]>(mockDeliveryPersons);
@@ -193,54 +186,6 @@ export function AdminStoreProvider({ children }: { children: ReactNode }) {
           return { ...u, is_banned: nextBan, ban_reason: nextBan ? reason : undefined };
         }
         return u;
-      })
-    );
-  };
-
-  const approveProduct = (productId: string) => {
-    setProducts((prev) =>
-      prev.map((p) => {
-        if (p.id === productId) {
-          logAction('product_approve', 'products', productId, `Approved product listing "${p.title}"`);
-          return {
-            ...p,
-            status: 'active',
-            approved_by_id: 'admin-001',
-            approved_at: new Date().toISOString(),
-          };
-        }
-        return p;
-      })
-    );
-  };
-
-  const rejectProduct = (productId: string, reason: string) => {
-    setProducts((prev) =>
-      prev.map((p) => {
-        if (p.id === productId) {
-          logAction('product_reject', 'products', productId, `Rejected product "${p.title}". Reason: ${reason}`);
-          return {
-            ...p,
-            status: 'rejected',
-            rejection_reason: reason,
-          };
-        }
-        return p;
-      })
-    );
-  };
-
-  const updateProductCityPrices = (productId: string, cityPrices: Record<string, number>) => {
-    setProducts((prev) =>
-      prev.map((p) => {
-        if (p.id === productId) {
-          logAction('product_approve', 'products', productId, `Updated city prices for "${p.title}"`);
-          return {
-            ...p,
-            city_prices: cityPrices,
-          };
-        }
-        return p;
       })
     );
   };
@@ -578,7 +523,6 @@ export function AdminStoreProvider({ children }: { children: ReactNode }) {
         setActiveTab,
         users,
         vendors,
-        products,
         categories,
         orders,
         deliveryPersons,
@@ -601,9 +545,6 @@ export function AdminStoreProvider({ children }: { children: ReactNode }) {
         migrationLogs: mockMigrationLogs,
 
         toggleUserBan,
-        approveProduct,
-        rejectProduct,
-        updateProductCityPrices,
         verifyVendorKyc,
         toggleVendorActive,
         updateVendorCommission,

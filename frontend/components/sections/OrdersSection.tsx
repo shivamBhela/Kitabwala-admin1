@@ -17,7 +17,10 @@ import {
   Calendar,
   Download,
   AlertCircle,
+  Package,
 } from 'lucide-react';
+import { delhiveryService, DelhiveryShipment } from '@/services/delhiveryService';
+import { toast } from 'sonner';
 
 export default function OrdersSection() {
   const { orders, updateOrderStatus, processOrderRefund } = useAdminStore();
@@ -32,6 +35,40 @@ export default function OrdersSection() {
   const [refundAmount, setRefundAmount] = useState<number>(0);
   const [refundMethod, setRefundMethod] = useState<'original_payment' | 'wallet'>('wallet');
   const [showInvoiceModal, setShowInvoiceModal] = useState<Order | null>(null);
+
+  const [creatingShipmentId, setCreatingShipmentId] = useState<string | null>(null);
+  const [showTrackingModal, setShowTrackingModal] = useState<DelhiveryShipment | null>(null);
+  const [trackingEvents, setTrackingEvents] = useState<any[]>([]);
+  const [isTracking, setIsTracking] = useState(false);
+
+  // Mock mapped shipments
+  const [shipmentsMap, setShipmentsMap] = useState<Record<string, DelhiveryShipment>>({});
+
+  const handleCreateShipment = async (orderId: string) => {
+    try {
+      setCreatingShipmentId(orderId);
+      const shipment = await delhiveryService.createShipment(orderId);
+      setShipmentsMap(prev => ({ ...prev, [orderId]: shipment }));
+      toast.success('Shipment created successfully with AWB: ' + shipment.awb_number);
+    } catch (e) {
+      toast.error('Failed to create shipment');
+    } finally {
+      setCreatingShipmentId(null);
+    }
+  };
+
+  const handleTrackShipment = async (shipment: DelhiveryShipment) => {
+    setShowTrackingModal(shipment);
+    setIsTracking(true);
+    try {
+      const events = await delhiveryService.trackShipment(shipment.awb_number);
+      setTrackingEvents(events);
+    } catch (e) {
+      toast.error('Failed to track shipment');
+    } finally {
+      setIsTracking(false);
+    }
+  };
 
   const filteredOrders = orders.filter((o) => {
     const matchesSearch =
@@ -218,6 +255,24 @@ export default function OrdersSection() {
                         >
                           <FileText className="w-4 h-4" />
                         </button>
+                        {shipmentsMap[ord.id] ? (
+                          <button
+                            onClick={() => handleTrackShipment(shipmentsMap[ord.id])}
+                            className="p-1.5 rounded-lg bg-blue-50 text-blue-700 dark:bg-blue-950 dark:text-blue-300 hover:bg-blue-100"
+                            title="Track Delhivery Shipment"
+                          >
+                            <Truck className="w-4 h-4" />
+                          </button>
+                        ) : (
+                          <button
+                            onClick={() => handleCreateShipment(ord.id)}
+                            disabled={creatingShipmentId === ord.id}
+                            className="p-1.5 rounded-lg bg-emerald-50 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300 hover:bg-emerald-100 disabled:opacity-50"
+                            title="Create Delhivery Shipment"
+                          >
+                            {creatingShipmentId === ord.id ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Package className="w-4 h-4" />}
+                          </button>
+                        )}
                       </div>
                     </td>
                   </tr>
@@ -417,6 +472,54 @@ export default function OrdersSection() {
             >
               Download PDF Invoice
             </button>
+          </div>
+        </div>
+      )}
+
+      {/* Tracking Modal */}
+      {showTrackingModal && (
+        <div className="fixed inset-0 bg-slate-950/60 backdrop-blur-xs flex items-center justify-center p-4 z-50">
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 w-full max-w-md rounded-2xl p-6 space-y-4">
+            <div className="flex justify-between items-center border-b border-slate-200 dark:border-slate-800 pb-3">
+              <div>
+                <h3 className="font-bold text-slate-900 dark:text-slate-100">Delhivery Tracking</h3>
+                <p className="text-xs text-slate-500">AWB: {showTrackingModal.awb_number}</p>
+              </div>
+              <button onClick={() => setShowTrackingModal(null)}>
+                <X className="w-5 h-5 text-slate-400" />
+              </button>
+            </div>
+
+            <div className="space-y-4">
+              {isTracking ? (
+                <div className="py-8 text-center text-slate-500 text-xs flex flex-col items-center">
+                  <RefreshCw className="w-5 h-5 animate-spin mb-2" />
+                  Fetching latest status from Delhivery...
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {trackingEvents.map((event, i) => (
+                    <div key={i} className="flex gap-3">
+                      <div className="flex flex-col items-center">
+                        <div className="w-2.5 h-2.5 rounded-full bg-amber-500 mt-1"></div>
+                        {i !== trackingEvents.length - 1 && <div className="w-0.5 h-full bg-slate-200 dark:bg-slate-700 my-1"></div>}
+                      </div>
+                      <div className="pb-4">
+                        <p className="text-sm font-bold text-slate-900 dark:text-slate-100">{event.status}</p>
+                        <p className="text-xs text-slate-500">{event.location}</p>
+                        <p className="text-[10px] text-slate-400 mt-1">{new Date(event.timestamp).toLocaleString()}</p>
+                      </div>
+                    </div>
+                  ))}
+                  
+                  <div className="pt-2">
+                    <a href={showTrackingModal.tracking_url} target="_blank" rel="noreferrer" className="w-full inline-flex justify-center items-center py-2.5 bg-blue-50 text-blue-700 font-bold rounded-xl text-xs hover:bg-blue-100 dark:bg-blue-900/30 dark:text-blue-400 dark:hover:bg-blue-900/50">
+                      View Official Tracking Page
+                    </a>
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       )}

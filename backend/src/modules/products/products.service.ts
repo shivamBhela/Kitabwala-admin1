@@ -289,6 +289,29 @@ export class ProductsService {
     return updated;
   }
 
+  async remove(id: number, adminId: number) {
+    const existing = await this.getProductOrThrow(id);
+
+    try {
+      await this.prisma.$transaction(async (tx) => {
+        await tx.productCategory.deleteMany({ where: { product_id: id } });
+        await tx.productCityPrice.deleteMany({ where: { product_id: id } });
+        await tx.product.delete({ where: { id } });
+      });
+    } catch (err) {
+      throw new BadRequestException(`Failed to delete product ${id}: ${err}`);
+    }
+
+    await this.audit.log(adminId, 'product_update', {
+      targetTable: 'products',
+      targetId: String(id),
+      description: `Deleted product "${existing.title}"`,
+      oldData: JSON.parse(JSON.stringify(existing)),
+    });
+
+    return { success: true };
+  }
+
   private mapWriteError(err: unknown, slug?: string, sku?: string): unknown {
     if (err instanceof Prisma.PrismaClientKnownRequestError && err.code === 'P2002') {
       const conflicting = [slug && `slug "${slug}"`, sku && `sku "${sku}"`].filter(Boolean).join(' or ');

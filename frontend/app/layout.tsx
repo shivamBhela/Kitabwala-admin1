@@ -61,7 +61,7 @@ export default function RootLayout({ children }: RootLayoutProps) {
       suppressHydrationWarning
       className={`${inter.variable} ${jetbrainsMono.variable}`}
     >
-      <body className="font-sans antialiased" style={{ background: '#ffffff' }}>
+      <body className="font-sans antialiased bg-background text-foreground">
         <AppProviders>{children}</AppProviders>
       </body>
     </html>

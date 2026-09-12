@@ -20,7 +20,7 @@ export function AppProviders({ children }: AppProvidersProps) {
     <ThemeProvider>
       <QueryProvider>
         {children}
-        <Toaster position="top-center" richColors theme="light" />
+        <Toaster position="top-center" richColors theme="system" />
       </QueryProvider>
     </ThemeProvider>
   );

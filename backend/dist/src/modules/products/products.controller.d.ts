@@ -383,6 +383,9 @@ export declare class ProductsController {
         approved_by_id: number | null;
         approved_at: Date | null;
     }>;
+    remove(id: number, user: AuthenticatedUser): Promise<{
+        success: boolean;
+    }>;
     approve(id: number, user: AuthenticatedUser): Promise<{
         vendor: {
             id: number;
