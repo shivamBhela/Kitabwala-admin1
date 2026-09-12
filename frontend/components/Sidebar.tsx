@@ -107,7 +107,6 @@ export const NAV_GROUPS: NavGroup[] = [
       { id: 'audit-logs', label: 'Admin Audit Logs', icon: History },
       { id: 'email-logs', label: 'Outgoing Email Logs', icon: Mail },
       { id: 'migration-logs', label: 'Migration Logs', icon: Database },
-      { id: 'schema-ref', label: 'Prisma Schema Ref', icon: Code2 },
     ],
   },
 ];

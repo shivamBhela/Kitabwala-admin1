@@ -32,7 +32,6 @@ import NotificationsSection from '@/components/sections/NotificationsSection';
 import AuditLogsSection from '@/components/sections/AuditLogsSection';
 import EmailLogsSection from '@/components/sections/EmailLogsSection';
 import MigrationLogsSection from '@/components/sections/MigrationLogsSection';
-import SchemaRefSection from '@/components/sections/SchemaRefSection';
 
 const SESSION_KEY = 'kw_admin_user';
 
@@ -90,7 +89,6 @@ function AdminMainContent({ adminUser }: { adminUser: AuthUser }) {
       case 'audit-logs':     return <AuditLogsSection />;
       case 'email-logs':     return <EmailLogsSection />;
       case 'migration-logs': return <MigrationLogsSection />;
-      case 'schema-ref':     return <SchemaRefSection />;
       default:               return <DashboardSection />;
     }
   };
