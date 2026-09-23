@@ -12,6 +12,9 @@ import {
   updateProduct,
   deleteProduct,
   deactivateProduct,
+  bulkApproveProducts,
+  bulkDeactivateProducts,
+  unfeatureProduct,
   type ApiProduct,
   type CreateProductPayload,
   type UpdateProductPayload,
@@ -27,7 +30,10 @@ import {
   Building2,
   X,
   Trash2,
+  Star,
+  StarOff,
 } from 'lucide-react';
+import { BulkResultsModal, CityPricesModal, FeatureProductModal } from '@/components/admin/products/ProductModals';
 
 const STATUSES: ApiProductStatus[] = ['pending_review', 'active', 'inactive', 'rejected'];
 
@@ -55,7 +61,10 @@ export default function ProductsSection() {
   const [rejectReason, setRejectReason] = useState('');
 
   const [cityPriceProduct, setCityPriceProduct] = useState<ApiProduct | null>(null);
-  const [editingCityPrices, setEditingCityPrices] = useState<Record<string, number>>({});
+  const [featureProductTarget, setFeatureProductTarget] = useState<ApiProduct | null>(null);
+  
+  const [selectedIds, setSelectedIds] = useState<number[]>([]);
+  const [bulkResults, setBulkResults] = useState<any[] | null>(null);
 
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [editProduct, setEditProduct] = useState<ApiProduct | null>(null);
@@ -87,8 +96,18 @@ export default function ProductsSection() {
   });
 
   const deactivateMutation = useMutation({ mutationFn: deactivateProduct, onSuccess: invalidate });
-
   const deleteMutation = useMutation({ mutationFn: deleteProduct, onSuccess: invalidate });
+  const unfeatureMutation = useMutation({ mutationFn: unfeatureProduct, onSuccess: invalidate });
+
+  const bulkApproveMutation = useMutation({
+    mutationFn: bulkApproveProducts,
+    onSuccess: (data) => { invalidate(); setBulkResults(data.results); setSelectedIds([]); }
+  });
+
+  const bulkDeactivateMutation = useMutation({
+    mutationFn: bulkDeactivateProducts,
+    onSuccess: (data) => { invalidate(); setBulkResults(data.results); setSelectedIds([]); }
+  });
 
   const createMutation = useMutation({
     mutationFn: createProduct,
@@ -142,6 +161,18 @@ export default function ProductsSection() {
 
   const isPending = createMutation.isPending || updateMutation.isPending;
 
+  const toggleSelectAll = () => {
+    if (selectedIds.length === products.length && products.length > 0) {
+      setSelectedIds([]);
+    } else {
+      setSelectedIds(products.map(p => p.id));
+    }
+  };
+
+  const toggleSelect = (id: number) => {
+    setSelectedIds(prev => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]);
+  };
+
   // ── Render ─────────────────────────────────────────────────────────────────
 
   return (
@@ -184,6 +215,26 @@ export default function ProductsSection() {
             ))}
           </div>
         </div>
+        
+        {selectedIds.length > 0 && (
+          <div className="flex items-center gap-3 p-3 bg-indigo-50/50 dark:bg-indigo-900/20 border border-indigo-100 dark:border-indigo-800 rounded-xl">
+            <span className="text-sm font-semibold text-indigo-700 dark:text-indigo-400">{selectedIds.length} selected</span>
+            <button
+              onClick={() => bulkApproveMutation.mutate(selectedIds)}
+              disabled={bulkApproveMutation.isPending}
+              className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-xs font-semibold flex items-center gap-1 disabled:opacity-50"
+            >
+              <CheckCircle2 className="w-3.5 h-3.5" /> Bulk Approve
+            </button>
+            <button
+              onClick={() => bulkDeactivateMutation.mutate(selectedIds)}
+              disabled={bulkDeactivateMutation.isPending}
+              className="px-3 py-1.5 bg-rose-600 hover:bg-rose-500 text-white rounded-lg text-xs font-semibold flex items-center gap-1 disabled:opacity-50"
+            >
+              <XCircle className="w-3.5 h-3.5" /> Bulk Deactivate
+            </button>
+          </div>
+        )}
       </div>
 
       {/* Products Table */}
@@ -197,6 +248,9 @@ export default function ProductsSection() {
             <table className="w-full text-left text-xs">
               <thead className="bg-slate-50 dark:bg-slate-800/60 text-slate-500 uppercase tracking-wider font-semibold border-b border-slate-200 dark:border-slate-800">
                 <tr>
+                  <th className="p-3.5 w-10">
+                    <input type="checkbox" checked={selectedIds.length === products.length && products.length > 0} onChange={toggleSelectAll} className="rounded border-slate-300" />
+                  </th>
                   <th className="p-3.5">Book Title & Author</th>
                   <th className="p-3.5">Vendor</th>
                   <th className="p-3.5">Price</th>
@@ -210,6 +264,9 @@ export default function ProductsSection() {
                   const primaryImg = p.images?.find((i) => i.is_primary)?.url ?? p.images?.[0]?.url;
                   return (
                     <tr key={p.id} className="hover:bg-slate-50/60 dark:hover:bg-slate-800/30 transition">
+                      <td className="p-3.5">
+                        <input type="checkbox" checked={selectedIds.includes(p.id)} onChange={() => toggleSelect(p.id)} className="rounded border-slate-300" />
+                      </td>
                       <td className="p-3.5">
                         <div className="flex items-center gap-3">
                           <div className="w-10 h-12 bg-slate-200 dark:bg-slate-800 rounded-md overflow-hidden shrink-0 flex items-center justify-center">
@@ -303,14 +360,30 @@ export default function ProductsSection() {
                           <button
                             onClick={() => {
                               setCityPriceProduct(p);
-                              const base = p.sale_price ?? p.regular_price;
-                              setEditingCityPrices(p.city_prices ?? { muzaffarpur: base, patna: base + 5 });
                             }}
                             className="p-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-700 dark:text-slate-300"
                             title="City Pricing"
                           >
                             <Building2 className="w-4 h-4" />
                           </button>
+                          
+                          {p.isFeatured ? (
+                            <button
+                              onClick={() => unfeatureMutation.mutate(p.id)}
+                              className="p-1.5 rounded-lg bg-indigo-100 dark:bg-indigo-900/30 hover:bg-indigo-200 text-indigo-700 dark:text-indigo-400"
+                              title="Unfeature Product"
+                            >
+                              <StarOff className="w-4 h-4" />
+                            </button>
+                          ) : (
+                            <button
+                              onClick={() => setFeatureProductTarget(p)}
+                              className="p-1.5 rounded-lg bg-amber-100 dark:bg-amber-900/30 hover:bg-amber-200 text-amber-700 dark:text-amber-400"
+                              title="Feature Product"
+                            >
+                              <Star className="w-4 h-4" />
+                            </button>
+                          )}
                         </div>
                       </td>
                     </tr>
@@ -454,41 +527,24 @@ export default function ProductsSection() {
         </div>
       )}
 
-      {/* City Pricing Modal */}
+      {bulkResults && (
+        <BulkResultsModal results={bulkResults} onClose={() => setBulkResults(null)} />
+      )}
+
+      {featureProductTarget && (
+        <FeatureProductModal
+          product={featureProductTarget}
+          onClose={() => setFeatureProductTarget(null)}
+          onSuccess={() => { invalidate(); setFeatureProductTarget(null); }}
+        />
+      )}
+
       {cityPriceProduct && (
-        <div className="fixed inset-0 bg-slate-950/60 backdrop-blur-xs flex items-center justify-center p-4 z-50">
-          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 w-full max-w-md rounded-2xl p-6 space-y-4">
-            <div className="flex justify-between items-center border-b border-slate-200 dark:border-slate-800 pb-3">
-              <h3 className="font-bold text-slate-900 dark:text-slate-100">City-wise Pricing</h3>
-              <button onClick={() => setCityPriceProduct(null)}>
-                <X className="w-5 h-5 text-slate-400" />
-              </button>
-            </div>
-            <p className="text-xs text-slate-500">"{cityPriceProduct.title}"</p>
-            <div className="space-y-3 text-xs">
-              {Object.entries(editingCityPrices).map(([city, price]) => (
-                <div key={city} className="flex justify-between items-center p-3 bg-slate-50 dark:bg-slate-800/50 rounded-xl">
-                  <span className="capitalize">{city.replace(/_/g, ' ')}</span>
-                  <div className="flex items-center gap-1">
-                    <span className="text-slate-500">₹</span>
-                    <input
-                      type="number"
-                      value={price}
-                      onChange={(e) => setEditingCityPrices({ ...editingCityPrices, [city]: Number(e.target.value) })}
-                      className="w-20 p-1.5 border rounded-lg text-emerald-600 font-bold text-right bg-white dark:bg-slate-900"
-                    />
-                  </div>
-                </div>
-              ))}
-            </div>
-            <button
-              onClick={() => { updateCityPrices(cityPriceProduct.id, editingCityPrices); setCityPriceProduct(null); }}
-              className="w-full py-2 bg-amber-500 text-slate-950 font-bold rounded-xl text-xs hover:bg-amber-400"
-            >
-              Save City Pricing
-            </button>
-          </div>
-        </div>
+        <CityPricesModal
+          product={cityPriceProduct}
+          onClose={() => setCityPriceProduct(null)}
+          onSuccess={() => { invalidate(); setCityPriceProduct(null); }}
+        />
       )}
     </div>
   );

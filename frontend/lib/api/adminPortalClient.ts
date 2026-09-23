@@ -17,7 +17,7 @@ import axios, {
 import { ApiError, type ApiResponse } from "@/types/api";
 import { AUTH_COOKIE_NAME, BASE_URL } from "@/constants/app";
 
-const axiosInstance: AxiosInstance = axios.create({
+const adminPortalClient: AxiosInstance = axios.create({
   baseURL: BASE_URL,
   timeout: 30000,
   withCredentials: true, // sends the httpOnly refresh-token cookie
@@ -28,7 +28,7 @@ const axiosInstance: AxiosInstance = axios.create({
 });
 
 // Separate, interceptor-free client for the refresh call itself — reusing
-// axiosInstance would recurse back into this same 401 handler.
+// adminPortalClient would recurse back into this same 401 handler.
 const refreshClient = axios.create({
   baseURL: BASE_URL,
   withCredentials: true,
@@ -36,7 +36,7 @@ const refreshClient = axios.create({
 
 // ─── Request Interceptor ─────────────────────────────────────────────────────
 
-axiosInstance.interceptors.request.use(
+adminPortalClient.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
     if (typeof window !== "undefined") {
       const token = localStorage.getItem(AUTH_COOKIE_NAME);
@@ -75,7 +75,7 @@ interface RetryableConfig extends AxiosRequestConfig {
   _retried?: boolean;
 }
 
-axiosInstance.interceptors.response.use(
+adminPortalClient.interceptors.response.use(
   (response) => response,
   async (error: AxiosError<{ message?: string; errors?: Record<string, string[]> }>) => {
     const status = error.response?.status ?? 500;
@@ -87,7 +87,7 @@ axiosInstance.interceptors.response.use(
       try {
         const newToken = await refreshAccessToken();
         originalConfig.headers = { ...originalConfig.headers, Authorization: `Bearer ${newToken}` };
-        return axiosInstance(originalConfig);
+        return adminPortalClient(originalConfig);
       } catch {
         // Refresh failed — fall through to the clear+redirect below.
       }
@@ -106,4 +106,4 @@ axiosInstance.interceptors.response.use(
   }
 );
 
-export default axiosInstance;
+export default adminPortalClient;

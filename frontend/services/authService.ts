@@ -5,12 +5,12 @@
  * interceptor, so each call unwraps `.data.data`.
  */
 
-import axiosInstance from "@/lib/axios";
+import adminPortalClient from "@/lib/api/adminPortalClient";
 import type { ApiResponse } from "@/types/api";
 import type { LoginResponse } from "@/types/auth";
 
 export async function login(identifier: string, password: string): Promise<LoginResponse> {
-  const { data } = await axiosInstance.post<ApiResponse<LoginResponse>>("/auth/login", {
+  const { data } = await adminPortalClient.post<ApiResponse<LoginResponse>>("/auth/login", {
     identifier,
     password,
   });
@@ -18,7 +18,7 @@ export async function login(identifier: string, password: string): Promise<Login
 }
 
 export async function verify2FALogin(pendingToken: string, code: string): Promise<LoginResponse> {
-  const { data } = await axiosInstance.post<ApiResponse<LoginResponse>>("/auth/2fa/verify-login", {
+  const { data } = await adminPortalClient.post<ApiResponse<LoginResponse>>("/auth/2fa/verify-login", {
     pendingToken,
     code,
   });
@@ -26,5 +26,5 @@ export async function verify2FALogin(pendingToken: string, code: string): Promis
 }
 
 export async function logout(): Promise<void> {
-  await axiosInstance.post("/auth/logout");
+  await adminPortalClient.post("/auth/logout");
 }

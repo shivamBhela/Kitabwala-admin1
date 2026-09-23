@@ -2,6 +2,8 @@
 
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { useAdminStore } from '@/lib/store';
 import { useUIStore } from '@/store/useUIStore';
 import { useQuery } from '@tanstack/react-query';
@@ -144,14 +146,13 @@ function badgeDotClass(variant: BadgeVariant): string {
 
 export default function Sidebar() {
   const {
-    activeTab,
-    setActiveTab,
     vendors,
     withdrawalRequests,
     returnRequests,
     reviews,
     supportTickets,
   } = useAdminStore();
+  const pathname = usePathname();
   const { isSidebarOpen, toggleSidebar } = useUIStore();
   const collapsed = !isSidebarOpen;
 
@@ -277,15 +278,14 @@ export default function Sidebar() {
 
             {group.items.map((item) => {
               const Icon = item.icon;
-              const isActive = activeTab === item.id;
+              const isActive = pathname === `/admin/${item.id}`;
               const badge = badgeConfig[item.id];
               const showBadge = Boolean(badge && badge.count > 0);
 
               return (
-                <button
+                <Link
                   key={item.id}
-                  type="button"
-                  onClick={() => setActiveTab(item.id)}
+                  href={`/admin/${item.id}`}
                   aria-current={isActive ? 'page' : undefined}
                   title={collapsed ? item.label : undefined}
                   className={cn(
@@ -339,7 +339,7 @@ export default function Sidebar() {
                       )}
                     />
                   )}
-                </button>
+                </Link>
               );
             })}
           </div>
