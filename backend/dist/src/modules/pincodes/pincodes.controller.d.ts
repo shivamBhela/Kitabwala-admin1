@@ -9,92 +9,18 @@ import { ImportPincodesDto } from './dto/import-pincodes.dto';
 export declare class PincodesController {
     private readonly pincodesService;
     constructor(pincodesService: PincodesService);
-    listCities(query: ListCitiesQueryDto): Promise<{
-        id: number;
-        is_active: boolean;
-        created_at: Date;
-        updated_at: Date;
-        name: string;
-        slug: string;
-    }[]>;
-    createCity(dto: CreateCityDto): Promise<{
-        id: number;
-        is_active: boolean;
-        created_at: Date;
-        updated_at: Date;
-        name: string;
-        slug: string;
-    }>;
+    listCities(query: ListCitiesQueryDto): Promise<any>;
+    createCity(dto: CreateCityDto): Promise<any>;
     listPincodes(query: ListPincodesQueryDto): Promise<{
-        items: ({
-            city: {
-                id: number;
-                is_active: boolean;
-                created_at: Date;
-                updated_at: Date;
-                name: string;
-                slug: string;
-            };
-        } & {
-            id: number;
-            created_at: Date;
-            updated_at: Date;
-            pincode: string;
-            city_id: number;
-            delivery_zone: import("@prisma/client").$Enums.DeliveryZone;
-            cod_type: import("@prisma/client").$Enums.CodType;
-            partial_cod_amount: import("@prisma/client/runtime/library").Decimal | null;
-            is_same_day_eligible: boolean;
-            is_delivery_available: boolean;
-        })[];
+        items: any;
         pagination: {
             page: number;
             pageSize: number;
-            total: number;
+            total: any;
             totalPages: number;
         };
     }>;
-    createPincode(dto: CreatePincodeDto): Promise<{
-        city: {
-            id: number;
-            is_active: boolean;
-            created_at: Date;
-            updated_at: Date;
-            name: string;
-            slug: string;
-        };
-    } & {
-        id: number;
-        created_at: Date;
-        updated_at: Date;
-        pincode: string;
-        city_id: number;
-        delivery_zone: import("@prisma/client").$Enums.DeliveryZone;
-        cod_type: import("@prisma/client").$Enums.CodType;
-        partial_cod_amount: import("@prisma/client/runtime/library").Decimal | null;
-        is_same_day_eligible: boolean;
-        is_delivery_available: boolean;
-    }>;
-    updatePincode(id: number, dto: UpdatePincodeDto): Promise<{
-        city: {
-            id: number;
-            is_active: boolean;
-            created_at: Date;
-            updated_at: Date;
-            name: string;
-            slug: string;
-        };
-    } & {
-        id: number;
-        created_at: Date;
-        updated_at: Date;
-        pincode: string;
-        city_id: number;
-        delivery_zone: import("@prisma/client").$Enums.DeliveryZone;
-        cod_type: import("@prisma/client").$Enums.CodType;
-        partial_cod_amount: import("@prisma/client/runtime/library").Decimal | null;
-        is_same_day_eligible: boolean;
-        is_delivery_available: boolean;
-    }>;
+    createPincode(dto: CreatePincodeDto): Promise<any>;
+    updatePincode(id: number, dto: UpdatePincodeDto): Promise<any>;
     importCsv(dto: ImportPincodesDto, user: AuthenticatedUser): Promise<import("./pincodes.service").ImportSummary>;
 }

@@ -5,7 +5,7 @@ import { ThrottlerGuard, ThrottlerModule, seconds } from '@nestjs/throttler';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { validateEnv } from './config/env.validation';
-import { PrismaModule } from './prisma/prisma.module';
+
 import { RedisModule } from './redis/redis.module';
 import { AllExceptionsFilter } from './common/filters/all-exceptions.filter';
 import { ResponseInterceptor } from './common/interceptors/response.interceptor';
@@ -31,7 +31,7 @@ import { ThemesModule } from './modules/themes/themes.module';
   imports: [
     ConfigModule.forRoot({ isGlobal: true, validate: validateEnv }),
     ThrottlerModule.forRoot([{ name: 'default', ttl: seconds(60), limit: 60 }]),
-    PrismaModule,
+
     RedisModule,
     AuditModule,
     AuthModule,

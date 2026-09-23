@@ -14,7 +14,6 @@ const throttler_1 = require("@nestjs/throttler");
 const app_controller_1 = require("./app.controller");
 const app_service_1 = require("./app.service");
 const env_validation_1 = require("./config/env.validation");
-const prisma_module_1 = require("./prisma/prisma.module");
 const redis_module_1 = require("./redis/redis.module");
 const all_exceptions_filter_1 = require("./common/filters/all-exceptions.filter");
 const response_interceptor_1 = require("./common/interceptors/response.interceptor");
@@ -43,7 +42,6 @@ exports.AppModule = AppModule = __decorate([
         imports: [
             config_1.ConfigModule.forRoot({ isGlobal: true, validate: env_validation_1.validateEnv }),
             throttler_1.ThrottlerModule.forRoot([{ name: 'default', ttl: (0, throttler_1.seconds)(60), limit: 60 }]),
-            prisma_module_1.PrismaModule,
             redis_module_1.RedisModule,
             audit_module_1.AuditModule,
             auth_module_1.AuthModule,

@@ -1,4 +1,3 @@
-import { Prisma } from '@prisma/client';
 import { PrismaService } from '../../prisma/prisma.service';
 import { AuditService } from '../audit/audit.service';
 import type { ListDeliveryPersonsQueryDto } from './dto/list-delivery-persons-query.dto';
@@ -12,339 +11,39 @@ export declare class DeliveryService {
     private readonly audit;
     constructor(prisma: PrismaService, audit: AuditService);
     findAllPersons(query: ListDeliveryPersonsQueryDto): Promise<{
-        data: ({
-            user: {
-                id: number;
-                user_code: string;
-                phone: string | null;
-                email: string | null;
-                role: import("@prisma/client").$Enums.UserRole;
-            };
-        } & {
-            id: number;
-            phone: string;
-            is_active: boolean;
-            created_at: Date;
-            updated_at: Date;
-            name: string;
-            user_id: number;
-            photo: string | null;
-            vehicle_type: string | null;
-            vehicle_number: string | null;
-            last_location_lat: Prisma.Decimal | null;
-            last_location_lng: Prisma.Decimal | null;
-            last_location_update: Date | null;
-            is_available: boolean;
-            salary_per_month: Prisma.Decimal | null;
-            per_delivery_charge: Prisma.Decimal | null;
-            per_km_charge: Prisma.Decimal | null;
-            joined_at: Date;
-        })[];
+        data: any;
         meta: {
-            total: number;
+            total: any;
             page: number;
             limit: number;
             totalPages: number;
         };
     }>;
     private validateLinkedUser;
-    createPerson(dto: CreateDeliveryPersonDto, adminId: number): Promise<{
-        user: {
-            id: number;
-            user_code: string;
-            phone: string | null;
-            email: string | null;
-            role: import("@prisma/client").$Enums.UserRole;
-        };
-    } & {
-        id: number;
-        phone: string;
-        is_active: boolean;
-        created_at: Date;
-        updated_at: Date;
-        name: string;
-        user_id: number;
-        photo: string | null;
-        vehicle_type: string | null;
-        vehicle_number: string | null;
-        last_location_lat: Prisma.Decimal | null;
-        last_location_lng: Prisma.Decimal | null;
-        last_location_update: Date | null;
-        is_available: boolean;
-        salary_per_month: Prisma.Decimal | null;
-        per_delivery_charge: Prisma.Decimal | null;
-        per_km_charge: Prisma.Decimal | null;
-        joined_at: Date;
-    }>;
+    createPerson(dto: CreateDeliveryPersonDto, adminId: number): Promise<any>;
     private getPersonOrThrow;
-    updatePerson(id: number, dto: UpdateDeliveryPersonDto, adminId: number): Promise<{
-        user: {
-            id: number;
-            user_code: string;
-            phone: string | null;
-            email: string | null;
-            role: import("@prisma/client").$Enums.UserRole;
-        };
-    } & {
-        id: number;
-        phone: string;
-        is_active: boolean;
-        created_at: Date;
-        updated_at: Date;
-        name: string;
-        user_id: number;
-        photo: string | null;
-        vehicle_type: string | null;
-        vehicle_number: string | null;
-        last_location_lat: Prisma.Decimal | null;
-        last_location_lng: Prisma.Decimal | null;
-        last_location_update: Date | null;
-        is_available: boolean;
-        salary_per_month: Prisma.Decimal | null;
-        per_delivery_charge: Prisma.Decimal | null;
-        per_km_charge: Prisma.Decimal | null;
-        joined_at: Date;
-    }>;
-    deactivatePerson(id: number, adminId: number): Promise<{
-        user: {
-            id: number;
-            user_code: string;
-            phone: string | null;
-            email: string | null;
-            role: import("@prisma/client").$Enums.UserRole;
-        };
-    } & {
-        id: number;
-        phone: string;
-        is_active: boolean;
-        created_at: Date;
-        updated_at: Date;
-        name: string;
-        user_id: number;
-        photo: string | null;
-        vehicle_type: string | null;
-        vehicle_number: string | null;
-        last_location_lat: Prisma.Decimal | null;
-        last_location_lng: Prisma.Decimal | null;
-        last_location_update: Date | null;
-        is_available: boolean;
-        salary_per_month: Prisma.Decimal | null;
-        per_delivery_charge: Prisma.Decimal | null;
-        per_km_charge: Prisma.Decimal | null;
-        joined_at: Date;
-    }>;
+    updatePerson(id: number, dto: UpdateDeliveryPersonDto, adminId: number): Promise<any>;
+    deactivatePerson(id: number, adminId: number): Promise<any>;
     findAllShipments(query: ListShipmentsQueryDto): Promise<{
-        data: ({
-            delivery_person: {
-                id: number;
-                phone: string;
-                name: string;
-            } | null;
-            order: {
-                id: number;
-                order_number: string;
-            };
-        } & {
-            id: number;
-            created_at: Date;
-            updated_at: Date;
-            status: import("@prisma/client").$Enums.ShipmentStatus;
-            delivery_type: import("@prisma/client").$Enums.DeliveryType;
-            order_id: number;
-            delivery_person_id: number | null;
-            tracking_id: string | null;
-            shadowfax_order_id: string | null;
-            pickup_otp: string | null;
-            delivery_otp: string | null;
-            otp_verified_at: Date | null;
-            estimated_delivery_date: Date | null;
-            actual_delivered_at: Date | null;
-            delivery_photo_url: string | null;
-            delivery_attempts: number;
-            last_attempt_at: Date | null;
-            failed_reason: string | null;
-            rescheduled_for: Date | null;
-        })[];
+        data: any;
         meta: {
-            total: number;
+            total: any;
             page: number;
             limit: number;
             totalPages: number;
         };
     }>;
-    findOneShipment(id: number): Promise<{
-        delivery_person: {
-            id: number;
-            phone: string;
-            is_active: boolean;
-            created_at: Date;
-            updated_at: Date;
-            name: string;
-            user_id: number;
-            photo: string | null;
-            vehicle_type: string | null;
-            vehicle_number: string | null;
-            last_location_lat: Prisma.Decimal | null;
-            last_location_lng: Prisma.Decimal | null;
-            last_location_update: Date | null;
-            is_available: boolean;
-            salary_per_month: Prisma.Decimal | null;
-            per_delivery_charge: Prisma.Decimal | null;
-            per_km_charge: Prisma.Decimal | null;
-            joined_at: Date;
-        } | null;
-        order: {
-            id: number;
-            city: {
-                id: number;
-                name: string;
-            } | null;
-            pincode: string | null;
-            total: Prisma.Decimal;
-            order_number: string;
-            status: import("@prisma/client").$Enums.OrderStatus;
-            payment_status: import("@prisma/client").$Enums.PaymentStatus;
-            delivery_type: import("@prisma/client").$Enums.DeliveryType;
-        };
-    } & {
-        id: number;
-        created_at: Date;
-        updated_at: Date;
-        status: import("@prisma/client").$Enums.ShipmentStatus;
-        delivery_type: import("@prisma/client").$Enums.DeliveryType;
-        order_id: number;
-        delivery_person_id: number | null;
-        tracking_id: string | null;
-        shadowfax_order_id: string | null;
-        pickup_otp: string | null;
-        delivery_otp: string | null;
-        otp_verified_at: Date | null;
-        estimated_delivery_date: Date | null;
-        actual_delivered_at: Date | null;
-        delivery_photo_url: string | null;
-        delivery_attempts: number;
-        last_attempt_at: Date | null;
-        failed_reason: string | null;
-        rescheduled_for: Date | null;
-    }>;
+    findOneShipment(id: number): Promise<any>;
     private getShipmentOrThrow;
-    assignShipment(id: number, dto: AssignShipmentDto, adminId: number): Promise<{
-        delivery_person: {
-            id: number;
-            phone: string;
-            is_active: boolean;
-            created_at: Date;
-            updated_at: Date;
-            name: string;
-            user_id: number;
-            photo: string | null;
-            vehicle_type: string | null;
-            vehicle_number: string | null;
-            last_location_lat: Prisma.Decimal | null;
-            last_location_lng: Prisma.Decimal | null;
-            last_location_update: Date | null;
-            is_available: boolean;
-            salary_per_month: Prisma.Decimal | null;
-            per_delivery_charge: Prisma.Decimal | null;
-            per_km_charge: Prisma.Decimal | null;
-            joined_at: Date;
-        } | null;
-        order: {
-            id: number;
-            city: {
-                id: number;
-                name: string;
-            } | null;
-            pincode: string | null;
-            total: Prisma.Decimal;
-            order_number: string;
-            status: import("@prisma/client").$Enums.OrderStatus;
-            payment_status: import("@prisma/client").$Enums.PaymentStatus;
-            delivery_type: import("@prisma/client").$Enums.DeliveryType;
-        };
-    } & {
-        id: number;
-        created_at: Date;
-        updated_at: Date;
-        status: import("@prisma/client").$Enums.ShipmentStatus;
-        delivery_type: import("@prisma/client").$Enums.DeliveryType;
-        order_id: number;
-        delivery_person_id: number | null;
-        tracking_id: string | null;
-        shadowfax_order_id: string | null;
-        pickup_otp: string | null;
-        delivery_otp: string | null;
-        otp_verified_at: Date | null;
-        estimated_delivery_date: Date | null;
-        actual_delivered_at: Date | null;
-        delivery_photo_url: string | null;
-        delivery_attempts: number;
-        last_attempt_at: Date | null;
-        failed_reason: string | null;
-        rescheduled_for: Date | null;
-    }>;
-    updateShipmentStatus(id: number, dto: UpdateShipmentStatusDto, adminId: number): Promise<{
-        delivery_person: {
-            id: number;
-            phone: string;
-            is_active: boolean;
-            created_at: Date;
-            updated_at: Date;
-            name: string;
-            user_id: number;
-            photo: string | null;
-            vehicle_type: string | null;
-            vehicle_number: string | null;
-            last_location_lat: Prisma.Decimal | null;
-            last_location_lng: Prisma.Decimal | null;
-            last_location_update: Date | null;
-            is_available: boolean;
-            salary_per_month: Prisma.Decimal | null;
-            per_delivery_charge: Prisma.Decimal | null;
-            per_km_charge: Prisma.Decimal | null;
-            joined_at: Date;
-        } | null;
-        order: {
-            id: number;
-            city: {
-                id: number;
-                name: string;
-            } | null;
-            pincode: string | null;
-            total: Prisma.Decimal;
-            order_number: string;
-            status: import("@prisma/client").$Enums.OrderStatus;
-            payment_status: import("@prisma/client").$Enums.PaymentStatus;
-            delivery_type: import("@prisma/client").$Enums.DeliveryType;
-        };
-    } & {
-        id: number;
-        created_at: Date;
-        updated_at: Date;
-        status: import("@prisma/client").$Enums.ShipmentStatus;
-        delivery_type: import("@prisma/client").$Enums.DeliveryType;
-        order_id: number;
-        delivery_person_id: number | null;
-        tracking_id: string | null;
-        shadowfax_order_id: string | null;
-        pickup_otp: string | null;
-        delivery_otp: string | null;
-        otp_verified_at: Date | null;
-        estimated_delivery_date: Date | null;
-        actual_delivered_at: Date | null;
-        delivery_photo_url: string | null;
-        delivery_attempts: number;
-        last_attempt_at: Date | null;
-        failed_reason: string | null;
-        rescheduled_for: Date | null;
-    }>;
+    assignShipment(id: number, dto: AssignShipmentDto, adminId: number): Promise<any>;
+    updateShipmentStatus(id: number, dto: UpdateShipmentStatusDto, adminId: number): Promise<any>;
     getShipmentAttempts(id: number): Promise<{
-        shipment_id: number;
-        delivery_type: import("@prisma/client").$Enums.DeliveryType;
-        max_attempts: number;
-        delivery_attempts: number;
-        last_attempt_at: Date | null;
-        failed_reason: string | null;
-        rescheduled_for: Date | null;
+        shipment_id: any;
+        delivery_type: any;
+        max_attempts: any;
+        delivery_attempts: any;
+        last_attempt_at: any;
+        failed_reason: any;
+        rescheduled_for: any;
     }>;
 }

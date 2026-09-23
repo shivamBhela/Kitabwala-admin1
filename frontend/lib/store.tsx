@@ -25,30 +25,6 @@ import {
   AdminActionType,
 } from './types';
 
-import {
-  mockUsers,
-  mockVendors,
-  mockOrders,
-  mockDeliveryPersons,
-  mockShipments,
-  mockReturnRequests,
-  mockWithdrawalRequests,
-  mockCoupons,
-  mockBanners,
-  mockHomepagePins,
-  mockReviews,
-  mockSupportTickets,
-  mockIssueReports,
-  mockCompetitiveExams,
-  mockAppSettings,
-  mockPushNotifications,
-  mockAdminActionLogs,
-  mockEmailLogs,
-  mockMigrationLogs,
-  mockPincodes,
-  mockCities,
-  mockCategories,
-} from './mockData';
 
 export interface AdminStoreContextType {
   activeTab: string;
@@ -75,8 +51,8 @@ export interface AdminStoreContextType {
   auditLogs: AdminActionLog[];
   pincodes: Pincode[];
   cities: City[];
-  emailLogs: typeof mockEmailLogs;
-  migrationLogs: typeof mockMigrationLogs;
+  emailLogs: any[];
+  migrationLogs: any[];
 
   // Actions
   toggleUserBan: (userId: string, reason?: string) => void;
@@ -119,26 +95,26 @@ const AdminStoreContext = createContext<AdminStoreContextType | undefined>(undef
 export function AdminStoreProvider({ children }: { children: ReactNode }) {
   const [activeTab, setActiveTab] = useState<string>('dashboard');
 
-  const [users, setUsers] = useState<User[]>(mockUsers);
-  const [vendors, setVendors] = useState<VendorProfile[]>(mockVendors);
-  const [categories] = useState<Category[]>(mockCategories);
-  const [orders, setOrders] = useState<Order[]>(mockOrders);
-  const [deliveryPersons] = useState<DeliveryPerson[]>(mockDeliveryPersons);
-  const [shipments] = useState<Shipment[]>(mockShipments);
-  const [returnRequests, setReturnRequests] = useState<ReturnRequest[]>(mockReturnRequests);
-  const [withdrawalRequests, setWithdrawalRequests] = useState<WithdrawalRequest[]>(mockWithdrawalRequests);
-  const [coupons, setCoupons] = useState<Coupon[]>(mockCoupons);
-  const [banners, setBanners] = useState<Banner[]>(mockBanners);
-  const [homepagePins, setHomepagePins] = useState<HomepagePin[]>(mockHomepagePins);
-  const [reviews, setReviews] = useState<ProductReview[]>(mockReviews);
-  const [supportTickets, setSupportTickets] = useState<SupportTicket[]>(mockSupportTickets);
-  const [issueReports, setIssueReports] = useState<IssueReport[]>(mockIssueReports);
-  const [exams] = useState<CompetitiveExam[]>(mockCompetitiveExams);
-  const [settings, setSettings] = useState<AppSetting[]>(mockAppSettings);
-  const [notifications, setNotifications] = useState<PushNotificationLog[]>(mockPushNotifications);
-  const [auditLogs, setAuditLogs] = useState<AdminActionLog[]>(mockAdminActionLogs);
-  const [pincodes, setPincodes] = useState<Pincode[]>(mockPincodes);
-  const [cities] = useState<City[]>(mockCities);
+  const [users, setUsers] = useState<User[]>([]);
+  const [vendors, setVendors] = useState<VendorProfile[]>([]);
+  const [categories] = useState<Category[]>([]);
+  const [orders, setOrders] = useState<Order[]>([]);
+  const [deliveryPersons] = useState<DeliveryPerson[]>([]);
+  const [shipments] = useState<Shipment[]>([]);
+  const [returnRequests, setReturnRequests] = useState<ReturnRequest[]>([]);
+  const [withdrawalRequests, setWithdrawalRequests] = useState<WithdrawalRequest[]>([]);
+  const [coupons, setCoupons] = useState<Coupon[]>([]);
+  const [banners, setBanners] = useState<Banner[]>([]);
+  const [homepagePins, setHomepagePins] = useState<HomepagePin[]>([]);
+  const [reviews, setReviews] = useState<ProductReview[]>([]);
+  const [supportTickets, setSupportTickets] = useState<SupportTicket[]>([]);
+  const [issueReports, setIssueReports] = useState<IssueReport[]>([]);
+  const [exams] = useState<CompetitiveExam[]>([]);
+  const [settings, setSettings] = useState<AppSetting[]>([]);
+  const [notifications, setNotifications] = useState<PushNotificationLog[]>([]);
+  const [auditLogs, setAuditLogs] = useState<AdminActionLog[]>([]);
+  const [pincodes, setPincodes] = useState<Pincode[]>([]);
+  const [cities] = useState<City[]>([]);
 
   // Static legal / policy pages — keyed by slug
   const DEFAULT_STATIC_PAGES: Record<string, string> = {
@@ -541,8 +517,8 @@ export function AdminStoreProvider({ children }: { children: ReactNode }) {
         auditLogs,
         pincodes,
         cities,
-        emailLogs: mockEmailLogs,
-        migrationLogs: mockMigrationLogs,
+        emailLogs: [],
+        migrationLogs: [],
 
         toggleUserBan,
         verifyVendorKyc,

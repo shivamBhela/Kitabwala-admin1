@@ -103,7 +103,6 @@ export default function Header({ adminUser = 'Super Admin', onLogout }: HeaderPr
       'audit-logs': 'Admin Action Audit Trail',
       'email-logs': 'Outgoing Email Logs',
       'migration-logs': 'Database Migration Logs',
-      'schema-ref': 'Prisma Schema & Enums Reference',
     };
     return titles[activeTab] || 'Admin Portal';
   };
