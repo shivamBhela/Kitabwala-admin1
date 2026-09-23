@@ -7,11 +7,8 @@ Kitabwalah Admin Portal/
 ├── kitabwalah-admin/            Next.js 16 / React 19 frontend (the admin portal UI)
 ├── kitabwalah-api/               NestJS 11 / Prisma 6 / PostgreSQL backend
 ├── kitabwalah_admin_portal.pdf   SPEC: 22-section admin-portal feature specification
-├── kitabwalah_schema.pdf         SPEC: Kitabwalah database — 46 models / 30 enums
-├── usedbooks_schema.pdf          SPEC: UsedBooks database — a SEPARATE second platform (42 models / 30 enums)
 ├── pdf_content.txt               Plain-text extraction of all three PDFs above
-├── package.json                  Root script that runs both apps together (`npm run dev`)
-├── .claude/AUDIT_BACKLOG.md       Full engineering audit — bugs, gaps, and fix order (read this for "what's broken")
+├── package.json                  Root script that runs both apps together (`npm run dev`
 ├── kitabwalah-api/IMPLEMENTATION_STATUS.md   Per-feature DONE/PARTIAL/BLOCKED status (UI/API/DB/Tests)
 └── kitabwalah-api/REMAINING_WORK.md          Every open item, blocking or not
 ```
