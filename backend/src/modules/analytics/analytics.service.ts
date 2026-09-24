@@ -130,7 +130,7 @@ export class AnalyticsService {
 
     return orders.reduce((sum, order) => {
       const zone = order.pincode ? zoneByPincode.get(order.pincode) : undefined;
-      return sum + (zone ? ZONE_RATE[zone] : 0);
+      return sum + (zone ? ZONE_RATE[zone as DeliveryZone] : 0);
     }, 0);
   }
 

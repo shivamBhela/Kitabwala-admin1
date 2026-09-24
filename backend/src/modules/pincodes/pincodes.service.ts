@@ -274,7 +274,7 @@ export class PincodesService {
 
       validRows.push({
         pincode,
-        city_id: cityId,
+        city_id: cityId as number,
         delivery_zone: zoneValue as DeliveryZone,
         cod_type: codValue as CodType,
         is_same_day_eligible: isSameDayEligible,

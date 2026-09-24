@@ -9,7 +9,6 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 var MapService_1;
-var _a;
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.MapService = void 0;
 const common_1 = require("@nestjs/common");
@@ -48,6 +47,6 @@ let MapService = MapService_1 = class MapService {
 exports.MapService = MapService;
 exports.MapService = MapService = MapService_1 = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [typeof (_a = typeof prisma_service_1.PrismaService !== "undefined" && prisma_service_1.PrismaService) === "function" ? _a : Object])
+    __metadata("design:paramtypes", [prisma_service_1.PrismaService])
 ], MapService);
 //# sourceMappingURL=map.service.js.map

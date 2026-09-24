@@ -6,17 +6,28 @@ export declare class AnalyticsController {
     getDashboard(): Promise<{
         stats: {
             totalRevenue: number;
-            totalOrders: any;
-            totalUsers: any;
-            activeVendors: any;
-            pendingOrders: any;
-            pendingProducts: any;
-            pendingKyc: any;
-            pendingWithdrawals: any;
-            pendingReturns: any;
-            lowStockProducts: any;
+            totalOrders: number;
+            totalUsers: number;
+            activeVendors: number;
+            pendingOrders: number;
+            pendingProducts: number;
+            pendingKyc: number;
+            pendingWithdrawals: number;
+            pendingReturns: number;
+            lowStockProducts: number;
         };
-        recentOrders: any;
-        revenueTrend: any;
+        recentOrders: {
+            id: number;
+            order_number: string;
+            customer_name: string;
+            delivery_type: import("@prisma/client").$Enums.DeliveryType;
+            total: number;
+            status: import("@prisma/client").$Enums.OrderStatus;
+            created_at: string;
+        }[];
+        revenueTrend: {
+            day: string;
+            revenue: number;
+        }[];
     }>;
 }

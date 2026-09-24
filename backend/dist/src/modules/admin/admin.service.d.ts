@@ -6,8 +6,8 @@ export declare class AdminService {
     private readonly audit;
     constructor(users: UsersService, audit: AuditService);
     createStaff(dto: CreateAdminStaffDto, createdByAdminId: number): Promise<{
-        id: any;
-        userCode: any;
-        adminRole: any;
+        id: number;
+        userCode: string;
+        adminRole: import("@prisma/client").$Enums.AdminRole;
     }>;
 }

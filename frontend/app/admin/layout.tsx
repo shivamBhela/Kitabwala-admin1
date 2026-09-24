@@ -7,6 +7,7 @@ import { logout as logoutRequest } from '@/services/authService';
 import { AUTH_COOKIE_NAME } from '@/constants/app';
 import type { AuthUser } from '@/types/auth';
 import { useRouter } from 'next/navigation';
+import { AdminStoreProvider } from '@/lib/store';
 
 const SESSION_KEY = 'kw_admin_user';
 
@@ -52,8 +53,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
   return (
     <div className="flex h-screen font-sans overflow-hidden" style={{ background: '#ffffff' }}>
-      <Sidebar />
-      <div className="flex-1 flex flex-col min-w-0 overflow-y-auto" style={{ background: '#ffffff' }}>
+      <AdminStoreProvider>
+        <Sidebar />
+        <div className="flex-1 flex flex-col min-w-0 overflow-y-auto" style={{ background: '#ffffff' }}>
         <Header adminUser={adminUser.displayName} onLogout={handleLogout} />
         <main className="flex-1 p-6 max-w-7xl w-full mx-auto space-y-6" style={{ background: '#ffffff' }}>
           {children}
@@ -74,6 +76,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           </span>
         </footer>
       </div>
+      </AdminStoreProvider>
     </div>
   );
 }

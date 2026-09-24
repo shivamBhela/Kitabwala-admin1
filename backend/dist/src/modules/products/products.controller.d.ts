@@ -11,32 +11,833 @@ export declare class ProductsController {
     private readonly productsService;
     constructor(productsService: ProductsService);
     findAll(query: ListProductsQueryDto): Promise<{
-        data: any;
+        data: ({
+            vendor: {
+                id: number;
+                store_name: string;
+            };
+            images: {
+                created_at: Date;
+                id: number;
+                wp_id: number | null;
+                updated_at: Date;
+                display_order: number;
+                is_primary: boolean;
+                product_id: number;
+                image_versions: import("@prisma/client/runtime/library").JsonValue;
+            }[];
+        } & {
+            description: string | null;
+            created_at: Date;
+            id: number;
+            wp_id: number | null;
+            updated_at: Date;
+            status: import("@prisma/client").$Enums.ProductStatus;
+            vendor_id: number;
+            slug: string;
+            title: string;
+            short_description: string | null;
+            regular_price: import("@prisma/client/runtime/library").Decimal;
+            sale_price: import("@prisma/client/runtime/library").Decimal | null;
+            base_price: import("@prisma/client/runtime/library").Decimal | null;
+            gst_rate: import("@prisma/client/runtime/library").Decimal;
+            hsn_code: string | null;
+            sku: string | null;
+            isbn: string | null;
+            author: string | null;
+            publisher: string | null;
+            edition: string | null;
+            language: string | null;
+            pages: number | null;
+            binding: string | null;
+            genre: string | null;
+            book_format: import("@prisma/client").$Enums.BookFormat;
+            condition: import("@prisma/client").$Enums.BookCondition;
+            condition_description: string | null;
+            stock_quantity: number;
+            manage_stock: boolean;
+            in_stock: boolean;
+            weight: import("@prisma/client/runtime/library").Decimal | null;
+            dimensions: import("@prisma/client/runtime/library").JsonValue | null;
+            meta_title: string | null;
+            meta_description: string | null;
+            rejection_reason: string | null;
+            featured_until: Date | null;
+            sold_count: number;
+            approved_by_id: number | null;
+            approved_at: Date | null;
+        })[];
         meta: {
-            total: any;
+            total: number;
             page: number;
             limit: number;
             totalPages: number;
         };
     }>;
-    findOne(id: number): Promise<any>;
-    create(dto: CreateProductDto, user: AuthenticatedUser): Promise<any>;
-    update(id: number, dto: UpdateProductDto, user: AuthenticatedUser): Promise<any>;
+    findOne(id: number): Promise<{
+        vendor: {
+            id: number;
+            is_active: boolean;
+            commission_rate: import("@prisma/client/runtime/library").Decimal;
+            is_verified: boolean;
+            store_name: string;
+            store_slug: string;
+        };
+        product_categories: ({
+            category: {
+                description: string | null;
+                created_at: Date;
+                id: number;
+                name: string;
+                wp_id: number | null;
+                is_active: boolean;
+                updated_at: Date;
+                slug: string;
+                parent_id: number | null;
+                image_url: string | null;
+                display_order: number;
+            };
+        } & {
+            category_id: number;
+            product_id: number;
+        })[];
+        images: {
+            created_at: Date;
+            id: number;
+            wp_id: number | null;
+            updated_at: Date;
+            display_order: number;
+            is_primary: boolean;
+            product_id: number;
+            image_versions: import("@prisma/client/runtime/library").JsonValue;
+        }[];
+        attributes: {
+            created_at: Date;
+            id: number;
+            updated_at: Date;
+            product_id: number;
+            attribute_name: string;
+            attribute_value: string;
+        }[];
+        city_prices: ({
+            city: {
+                created_at: Date;
+                id: number;
+                name: string;
+                is_active: boolean;
+                updated_at: Date;
+                slug: string;
+            };
+        } & {
+            created_at: Date;
+            id: number;
+            updated_at: Date;
+            city_id: number;
+            price: import("@prisma/client/runtime/library").Decimal;
+            product_id: number;
+        })[];
+    } & {
+        description: string | null;
+        created_at: Date;
+        id: number;
+        wp_id: number | null;
+        updated_at: Date;
+        status: import("@prisma/client").$Enums.ProductStatus;
+        vendor_id: number;
+        slug: string;
+        title: string;
+        short_description: string | null;
+        regular_price: import("@prisma/client/runtime/library").Decimal;
+        sale_price: import("@prisma/client/runtime/library").Decimal | null;
+        base_price: import("@prisma/client/runtime/library").Decimal | null;
+        gst_rate: import("@prisma/client/runtime/library").Decimal;
+        hsn_code: string | null;
+        sku: string | null;
+        isbn: string | null;
+        author: string | null;
+        publisher: string | null;
+        edition: string | null;
+        language: string | null;
+        pages: number | null;
+        binding: string | null;
+        genre: string | null;
+        book_format: import("@prisma/client").$Enums.BookFormat;
+        condition: import("@prisma/client").$Enums.BookCondition;
+        condition_description: string | null;
+        stock_quantity: number;
+        manage_stock: boolean;
+        in_stock: boolean;
+        weight: import("@prisma/client/runtime/library").Decimal | null;
+        dimensions: import("@prisma/client/runtime/library").JsonValue | null;
+        meta_title: string | null;
+        meta_description: string | null;
+        rejection_reason: string | null;
+        featured_until: Date | null;
+        sold_count: number;
+        approved_by_id: number | null;
+        approved_at: Date | null;
+    }>;
+    create(dto: CreateProductDto, user: AuthenticatedUser): Promise<{
+        vendor: {
+            id: number;
+            is_active: boolean;
+            commission_rate: import("@prisma/client/runtime/library").Decimal;
+            is_verified: boolean;
+            store_name: string;
+            store_slug: string;
+        };
+        product_categories: ({
+            category: {
+                description: string | null;
+                created_at: Date;
+                id: number;
+                name: string;
+                wp_id: number | null;
+                is_active: boolean;
+                updated_at: Date;
+                slug: string;
+                parent_id: number | null;
+                image_url: string | null;
+                display_order: number;
+            };
+        } & {
+            category_id: number;
+            product_id: number;
+        })[];
+        images: {
+            created_at: Date;
+            id: number;
+            wp_id: number | null;
+            updated_at: Date;
+            display_order: number;
+            is_primary: boolean;
+            product_id: number;
+            image_versions: import("@prisma/client/runtime/library").JsonValue;
+        }[];
+        attributes: {
+            created_at: Date;
+            id: number;
+            updated_at: Date;
+            product_id: number;
+            attribute_name: string;
+            attribute_value: string;
+        }[];
+        city_prices: ({
+            city: {
+                created_at: Date;
+                id: number;
+                name: string;
+                is_active: boolean;
+                updated_at: Date;
+                slug: string;
+            };
+        } & {
+            created_at: Date;
+            id: number;
+            updated_at: Date;
+            city_id: number;
+            price: import("@prisma/client/runtime/library").Decimal;
+            product_id: number;
+        })[];
+    } & {
+        description: string | null;
+        created_at: Date;
+        id: number;
+        wp_id: number | null;
+        updated_at: Date;
+        status: import("@prisma/client").$Enums.ProductStatus;
+        vendor_id: number;
+        slug: string;
+        title: string;
+        short_description: string | null;
+        regular_price: import("@prisma/client/runtime/library").Decimal;
+        sale_price: import("@prisma/client/runtime/library").Decimal | null;
+        base_price: import("@prisma/client/runtime/library").Decimal | null;
+        gst_rate: import("@prisma/client/runtime/library").Decimal;
+        hsn_code: string | null;
+        sku: string | null;
+        isbn: string | null;
+        author: string | null;
+        publisher: string | null;
+        edition: string | null;
+        language: string | null;
+        pages: number | null;
+        binding: string | null;
+        genre: string | null;
+        book_format: import("@prisma/client").$Enums.BookFormat;
+        condition: import("@prisma/client").$Enums.BookCondition;
+        condition_description: string | null;
+        stock_quantity: number;
+        manage_stock: boolean;
+        in_stock: boolean;
+        weight: import("@prisma/client/runtime/library").Decimal | null;
+        dimensions: import("@prisma/client/runtime/library").JsonValue | null;
+        meta_title: string | null;
+        meta_description: string | null;
+        rejection_reason: string | null;
+        featured_until: Date | null;
+        sold_count: number;
+        approved_by_id: number | null;
+        approved_at: Date | null;
+    }>;
+    update(id: number, dto: UpdateProductDto, user: AuthenticatedUser): Promise<{
+        vendor: {
+            id: number;
+            is_active: boolean;
+            commission_rate: import("@prisma/client/runtime/library").Decimal;
+            is_verified: boolean;
+            store_name: string;
+            store_slug: string;
+        };
+        product_categories: ({
+            category: {
+                description: string | null;
+                created_at: Date;
+                id: number;
+                name: string;
+                wp_id: number | null;
+                is_active: boolean;
+                updated_at: Date;
+                slug: string;
+                parent_id: number | null;
+                image_url: string | null;
+                display_order: number;
+            };
+        } & {
+            category_id: number;
+            product_id: number;
+        })[];
+        images: {
+            created_at: Date;
+            id: number;
+            wp_id: number | null;
+            updated_at: Date;
+            display_order: number;
+            is_primary: boolean;
+            product_id: number;
+            image_versions: import("@prisma/client/runtime/library").JsonValue;
+        }[];
+        attributes: {
+            created_at: Date;
+            id: number;
+            updated_at: Date;
+            product_id: number;
+            attribute_name: string;
+            attribute_value: string;
+        }[];
+        city_prices: ({
+            city: {
+                created_at: Date;
+                id: number;
+                name: string;
+                is_active: boolean;
+                updated_at: Date;
+                slug: string;
+            };
+        } & {
+            created_at: Date;
+            id: number;
+            updated_at: Date;
+            city_id: number;
+            price: import("@prisma/client/runtime/library").Decimal;
+            product_id: number;
+        })[];
+    } & {
+        description: string | null;
+        created_at: Date;
+        id: number;
+        wp_id: number | null;
+        updated_at: Date;
+        status: import("@prisma/client").$Enums.ProductStatus;
+        vendor_id: number;
+        slug: string;
+        title: string;
+        short_description: string | null;
+        regular_price: import("@prisma/client/runtime/library").Decimal;
+        sale_price: import("@prisma/client/runtime/library").Decimal | null;
+        base_price: import("@prisma/client/runtime/library").Decimal | null;
+        gst_rate: import("@prisma/client/runtime/library").Decimal;
+        hsn_code: string | null;
+        sku: string | null;
+        isbn: string | null;
+        author: string | null;
+        publisher: string | null;
+        edition: string | null;
+        language: string | null;
+        pages: number | null;
+        binding: string | null;
+        genre: string | null;
+        book_format: import("@prisma/client").$Enums.BookFormat;
+        condition: import("@prisma/client").$Enums.BookCondition;
+        condition_description: string | null;
+        stock_quantity: number;
+        manage_stock: boolean;
+        in_stock: boolean;
+        weight: import("@prisma/client/runtime/library").Decimal | null;
+        dimensions: import("@prisma/client/runtime/library").JsonValue | null;
+        meta_title: string | null;
+        meta_description: string | null;
+        rejection_reason: string | null;
+        featured_until: Date | null;
+        sold_count: number;
+        approved_by_id: number | null;
+        approved_at: Date | null;
+    }>;
     remove(id: number, user: AuthenticatedUser): Promise<{
         success: boolean;
     }>;
-    approve(id: number, user: AuthenticatedUser): Promise<any>;
-    reject(id: number, dto: RejectProductDto, user: AuthenticatedUser): Promise<any>;
+    approve(id: number, user: AuthenticatedUser): Promise<{
+        vendor: {
+            id: number;
+            is_active: boolean;
+            commission_rate: import("@prisma/client/runtime/library").Decimal;
+            is_verified: boolean;
+            store_name: string;
+            store_slug: string;
+        };
+        product_categories: ({
+            category: {
+                description: string | null;
+                created_at: Date;
+                id: number;
+                name: string;
+                wp_id: number | null;
+                is_active: boolean;
+                updated_at: Date;
+                slug: string;
+                parent_id: number | null;
+                image_url: string | null;
+                display_order: number;
+            };
+        } & {
+            category_id: number;
+            product_id: number;
+        })[];
+        images: {
+            created_at: Date;
+            id: number;
+            wp_id: number | null;
+            updated_at: Date;
+            display_order: number;
+            is_primary: boolean;
+            product_id: number;
+            image_versions: import("@prisma/client/runtime/library").JsonValue;
+        }[];
+        attributes: {
+            created_at: Date;
+            id: number;
+            updated_at: Date;
+            product_id: number;
+            attribute_name: string;
+            attribute_value: string;
+        }[];
+        city_prices: ({
+            city: {
+                created_at: Date;
+                id: number;
+                name: string;
+                is_active: boolean;
+                updated_at: Date;
+                slug: string;
+            };
+        } & {
+            created_at: Date;
+            id: number;
+            updated_at: Date;
+            city_id: number;
+            price: import("@prisma/client/runtime/library").Decimal;
+            product_id: number;
+        })[];
+    } & {
+        description: string | null;
+        created_at: Date;
+        id: number;
+        wp_id: number | null;
+        updated_at: Date;
+        status: import("@prisma/client").$Enums.ProductStatus;
+        vendor_id: number;
+        slug: string;
+        title: string;
+        short_description: string | null;
+        regular_price: import("@prisma/client/runtime/library").Decimal;
+        sale_price: import("@prisma/client/runtime/library").Decimal | null;
+        base_price: import("@prisma/client/runtime/library").Decimal | null;
+        gst_rate: import("@prisma/client/runtime/library").Decimal;
+        hsn_code: string | null;
+        sku: string | null;
+        isbn: string | null;
+        author: string | null;
+        publisher: string | null;
+        edition: string | null;
+        language: string | null;
+        pages: number | null;
+        binding: string | null;
+        genre: string | null;
+        book_format: import("@prisma/client").$Enums.BookFormat;
+        condition: import("@prisma/client").$Enums.BookCondition;
+        condition_description: string | null;
+        stock_quantity: number;
+        manage_stock: boolean;
+        in_stock: boolean;
+        weight: import("@prisma/client/runtime/library").Decimal | null;
+        dimensions: import("@prisma/client/runtime/library").JsonValue | null;
+        meta_title: string | null;
+        meta_description: string | null;
+        rejection_reason: string | null;
+        featured_until: Date | null;
+        sold_count: number;
+        approved_by_id: number | null;
+        approved_at: Date | null;
+    }>;
+    reject(id: number, dto: RejectProductDto, user: AuthenticatedUser): Promise<{
+        vendor: {
+            id: number;
+            is_active: boolean;
+            commission_rate: import("@prisma/client/runtime/library").Decimal;
+            is_verified: boolean;
+            store_name: string;
+            store_slug: string;
+        };
+        product_categories: ({
+            category: {
+                description: string | null;
+                created_at: Date;
+                id: number;
+                name: string;
+                wp_id: number | null;
+                is_active: boolean;
+                updated_at: Date;
+                slug: string;
+                parent_id: number | null;
+                image_url: string | null;
+                display_order: number;
+            };
+        } & {
+            category_id: number;
+            product_id: number;
+        })[];
+        images: {
+            created_at: Date;
+            id: number;
+            wp_id: number | null;
+            updated_at: Date;
+            display_order: number;
+            is_primary: boolean;
+            product_id: number;
+            image_versions: import("@prisma/client/runtime/library").JsonValue;
+        }[];
+        attributes: {
+            created_at: Date;
+            id: number;
+            updated_at: Date;
+            product_id: number;
+            attribute_name: string;
+            attribute_value: string;
+        }[];
+        city_prices: ({
+            city: {
+                created_at: Date;
+                id: number;
+                name: string;
+                is_active: boolean;
+                updated_at: Date;
+                slug: string;
+            };
+        } & {
+            created_at: Date;
+            id: number;
+            updated_at: Date;
+            city_id: number;
+            price: import("@prisma/client/runtime/library").Decimal;
+            product_id: number;
+        })[];
+    } & {
+        description: string | null;
+        created_at: Date;
+        id: number;
+        wp_id: number | null;
+        updated_at: Date;
+        status: import("@prisma/client").$Enums.ProductStatus;
+        vendor_id: number;
+        slug: string;
+        title: string;
+        short_description: string | null;
+        regular_price: import("@prisma/client/runtime/library").Decimal;
+        sale_price: import("@prisma/client/runtime/library").Decimal | null;
+        base_price: import("@prisma/client/runtime/library").Decimal | null;
+        gst_rate: import("@prisma/client/runtime/library").Decimal;
+        hsn_code: string | null;
+        sku: string | null;
+        isbn: string | null;
+        author: string | null;
+        publisher: string | null;
+        edition: string | null;
+        language: string | null;
+        pages: number | null;
+        binding: string | null;
+        genre: string | null;
+        book_format: import("@prisma/client").$Enums.BookFormat;
+        condition: import("@prisma/client").$Enums.BookCondition;
+        condition_description: string | null;
+        stock_quantity: number;
+        manage_stock: boolean;
+        in_stock: boolean;
+        weight: import("@prisma/client/runtime/library").Decimal | null;
+        dimensions: import("@prisma/client/runtime/library").JsonValue | null;
+        meta_title: string | null;
+        meta_description: string | null;
+        rejection_reason: string | null;
+        featured_until: Date | null;
+        sold_count: number;
+        approved_by_id: number | null;
+        approved_at: Date | null;
+    }>;
     bulkApprove(dto: BulkProductIdsDto, user: AuthenticatedUser): Promise<{
-        approved: any;
+        approved: number;
         ids: number[];
     }>;
     bulkDeactivate(dto: BulkProductIdsDto, user: AuthenticatedUser): Promise<{
-        deactivated: any;
+        deactivated: number;
         ids: number[];
     }>;
-    feature(id: number, dto: FeatureProductDto, user: AuthenticatedUser): Promise<any>;
-    unfeature(id: number, user: AuthenticatedUser): Promise<any>;
-    listCityPrices(id: number): Promise<any>;
-    upsertCityPrice(id: number, cityId: number, dto: UpsertCityPriceDto, user: AuthenticatedUser): Promise<any>;
+    feature(id: number, dto: FeatureProductDto, user: AuthenticatedUser): Promise<{
+        vendor: {
+            id: number;
+            is_active: boolean;
+            commission_rate: import("@prisma/client/runtime/library").Decimal;
+            is_verified: boolean;
+            store_name: string;
+            store_slug: string;
+        };
+        product_categories: ({
+            category: {
+                description: string | null;
+                created_at: Date;
+                id: number;
+                name: string;
+                wp_id: number | null;
+                is_active: boolean;
+                updated_at: Date;
+                slug: string;
+                parent_id: number | null;
+                image_url: string | null;
+                display_order: number;
+            };
+        } & {
+            category_id: number;
+            product_id: number;
+        })[];
+        images: {
+            created_at: Date;
+            id: number;
+            wp_id: number | null;
+            updated_at: Date;
+            display_order: number;
+            is_primary: boolean;
+            product_id: number;
+            image_versions: import("@prisma/client/runtime/library").JsonValue;
+        }[];
+        attributes: {
+            created_at: Date;
+            id: number;
+            updated_at: Date;
+            product_id: number;
+            attribute_name: string;
+            attribute_value: string;
+        }[];
+        city_prices: ({
+            city: {
+                created_at: Date;
+                id: number;
+                name: string;
+                is_active: boolean;
+                updated_at: Date;
+                slug: string;
+            };
+        } & {
+            created_at: Date;
+            id: number;
+            updated_at: Date;
+            city_id: number;
+            price: import("@prisma/client/runtime/library").Decimal;
+            product_id: number;
+        })[];
+    } & {
+        description: string | null;
+        created_at: Date;
+        id: number;
+        wp_id: number | null;
+        updated_at: Date;
+        status: import("@prisma/client").$Enums.ProductStatus;
+        vendor_id: number;
+        slug: string;
+        title: string;
+        short_description: string | null;
+        regular_price: import("@prisma/client/runtime/library").Decimal;
+        sale_price: import("@prisma/client/runtime/library").Decimal | null;
+        base_price: import("@prisma/client/runtime/library").Decimal | null;
+        gst_rate: import("@prisma/client/runtime/library").Decimal;
+        hsn_code: string | null;
+        sku: string | null;
+        isbn: string | null;
+        author: string | null;
+        publisher: string | null;
+        edition: string | null;
+        language: string | null;
+        pages: number | null;
+        binding: string | null;
+        genre: string | null;
+        book_format: import("@prisma/client").$Enums.BookFormat;
+        condition: import("@prisma/client").$Enums.BookCondition;
+        condition_description: string | null;
+        stock_quantity: number;
+        manage_stock: boolean;
+        in_stock: boolean;
+        weight: import("@prisma/client/runtime/library").Decimal | null;
+        dimensions: import("@prisma/client/runtime/library").JsonValue | null;
+        meta_title: string | null;
+        meta_description: string | null;
+        rejection_reason: string | null;
+        featured_until: Date | null;
+        sold_count: number;
+        approved_by_id: number | null;
+        approved_at: Date | null;
+    }>;
+    unfeature(id: number, user: AuthenticatedUser): Promise<{
+        vendor: {
+            id: number;
+            is_active: boolean;
+            commission_rate: import("@prisma/client/runtime/library").Decimal;
+            is_verified: boolean;
+            store_name: string;
+            store_slug: string;
+        };
+        product_categories: ({
+            category: {
+                description: string | null;
+                created_at: Date;
+                id: number;
+                name: string;
+                wp_id: number | null;
+                is_active: boolean;
+                updated_at: Date;
+                slug: string;
+                parent_id: number | null;
+                image_url: string | null;
+                display_order: number;
+            };
+        } & {
+            category_id: number;
+            product_id: number;
+        })[];
+        images: {
+            created_at: Date;
+            id: number;
+            wp_id: number | null;
+            updated_at: Date;
+            display_order: number;
+            is_primary: boolean;
+            product_id: number;
+            image_versions: import("@prisma/client/runtime/library").JsonValue;
+        }[];
+        attributes: {
+            created_at: Date;
+            id: number;
+            updated_at: Date;
+            product_id: number;
+            attribute_name: string;
+            attribute_value: string;
+        }[];
+        city_prices: ({
+            city: {
+                created_at: Date;
+                id: number;
+                name: string;
+                is_active: boolean;
+                updated_at: Date;
+                slug: string;
+            };
+        } & {
+            created_at: Date;
+            id: number;
+            updated_at: Date;
+            city_id: number;
+            price: import("@prisma/client/runtime/library").Decimal;
+            product_id: number;
+        })[];
+    } & {
+        description: string | null;
+        created_at: Date;
+        id: number;
+        wp_id: number | null;
+        updated_at: Date;
+        status: import("@prisma/client").$Enums.ProductStatus;
+        vendor_id: number;
+        slug: string;
+        title: string;
+        short_description: string | null;
+        regular_price: import("@prisma/client/runtime/library").Decimal;
+        sale_price: import("@prisma/client/runtime/library").Decimal | null;
+        base_price: import("@prisma/client/runtime/library").Decimal | null;
+        gst_rate: import("@prisma/client/runtime/library").Decimal;
+        hsn_code: string | null;
+        sku: string | null;
+        isbn: string | null;
+        author: string | null;
+        publisher: string | null;
+        edition: string | null;
+        language: string | null;
+        pages: number | null;
+        binding: string | null;
+        genre: string | null;
+        book_format: import("@prisma/client").$Enums.BookFormat;
+        condition: import("@prisma/client").$Enums.BookCondition;
+        condition_description: string | null;
+        stock_quantity: number;
+        manage_stock: boolean;
+        in_stock: boolean;
+        weight: import("@prisma/client/runtime/library").Decimal | null;
+        dimensions: import("@prisma/client/runtime/library").JsonValue | null;
+        meta_title: string | null;
+        meta_description: string | null;
+        rejection_reason: string | null;
+        featured_until: Date | null;
+        sold_count: number;
+        approved_by_id: number | null;
+        approved_at: Date | null;
+    }>;
+    listCityPrices(id: number): Promise<({
+        city: {
+            created_at: Date;
+            id: number;
+            name: string;
+            is_active: boolean;
+            updated_at: Date;
+            slug: string;
+        };
+    } & {
+        created_at: Date;
+        id: number;
+        updated_at: Date;
+        city_id: number;
+        price: import("@prisma/client/runtime/library").Decimal;
+        product_id: number;
+    })[]>;
+    upsertCityPrice(id: number, cityId: number, dto: UpsertCityPriceDto, user: AuthenticatedUser): Promise<{
+        city: {
+            created_at: Date;
+            id: number;
+            name: string;
+            is_active: boolean;
+            updated_at: Date;
+            slug: string;
+        };
+    } & {
+        created_at: Date;
+        id: number;
+        updated_at: Date;
+        city_id: number;
+        price: import("@prisma/client/runtime/library").Decimal;
+        product_id: number;
+    }>;
 }
